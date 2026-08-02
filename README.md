@@ -1,7 +1,8 @@
 # DeterminFlow Plugins
 
-DeterminFlow 的官方 Workflow Plugin 仓库。Plugin 可以把 API、Workflow、Agent、Prompt、
-Script Library（脚本库）和数据库迁移一起交付，并由 Core 锁定到具体版本运行。
+[`DeterminFlow`](https://github.com/alikon-art/determinflow) 的官方 Workflow Plugin 仓库。
+Plugin 可以把 API、Workflow、Agent、Prompt、Script Library（脚本库）和数据库迁移
+一起交付，并由 Core 锁定到具体版本运行。
 
 ## 官方案例
 
@@ -13,7 +14,7 @@ Script Library（脚本库）和数据库迁移一起交付，并由 Core 锁定
 
 在 DeterminFlow 的 Plugin 页面填写：
 
-- Git URL：本仓库的 GitHub Clone 地址
+- Git URL：`https://github.com/alikon-art/determinflow-plugins.git`
 - Ref：Release Tag，例如 `v0.1.0`
 - Subdirectory：`plugins/bishu-novel`
 
