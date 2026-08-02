@@ -1,0 +1,341 @@
+{
+  "workflow_id": "story-plan",
+  "name": "故事宏观规划",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "script_sync_down",
+      "label": "DB同步→文件",
+      "node_type": "script",
+      "agent_type": "default",
+      "system_prompt_template": "",
+      "first_message": "",
+      "position": {
+        "x": 140,
+        "y": 140
+      },
+      "var_bindings": {},
+      "node_params": {
+        "script_source": "library",
+        "script_type": "python",
+        "script_name": "db_sync",
+        "script_args": "--book-id '{{book_id}}' --templates world,character",
+        "timeout": "30",
+        "script_group": "nvl"
+      },
+      "auto_flow": false,
+      "enable_complete_node_task": true,
+      "output_variable": "",
+      "enable_reject_upstream": false,
+      "max_reject_count": 3,
+      "save_output_to_file": false,
+      "output_file_path": "",
+      "sub_workflow_params": {},
+      "fail_auto_skip": false
+    },
+    {
+      "id": "agent_mpvb7xer_1",
+      "label": "故事宏观规划",
+      "node_type": "agent",
+      "agent_type": "novel-story-planner",
+      "system_prompt_template": "",
+      "first_message": "【题材创意】\n{{premise}}\n{{genre}}\n\n【世界观设定】\n{{world_foundation}}\n\n【角色档案】\n{{character_profiles}}\n\n请基于以上信息，构建三层故事力学引擎。\n\n你的产出是下游卷纲/近纲/导演的力学基础——只定义力的性质和规律，不定义力在哪一章以什么事件落地。\n只在输入信息不足或矛盾时使用 issues 标记，信息够就不需要 issues。\n\n输出语言：{{language}}。你的所有产出内容——包括文件内容、JSON 字段值、分析报告——都必须使用 {{language}}。",
+      "position": {
+        "x": 140,
+        "y": 240
+      },
+      "var_bindings": {},
+      "node_params": {},
+      "auto_flow": true,
+      "enable_complete_node_task": false,
+      "output_variable": "",
+      "enable_reject_upstream": false,
+      "max_reject_count": 3,
+      "save_output_to_file": true,
+      "output_file_path": "cache/story_plan/story_plan.json",
+      "sub_workflow_params": {},
+      "fail_auto_skip": false
+    },
+    {
+      "id": "agent_style",
+      "label": "风格档案生成",
+      "node_type": "agent",
+      "agent_type": "novel-style-profiler",
+      "system_prompt_template": "",
+      "first_message": "【故事引擎】\n{{story_plan_file}}\n{{genre}}\n\n请基于故事引擎的 tone_reference 和 genre，生成风格档案 JSON。\n\n输出语言：{{language}}。你的所有产出内容——包括文件内容、JSON 字段值、分析报告——都必须使用 {{language}}。",
+      "position": {
+        "x": 140,
+        "y": 340
+      },
+      "var_bindings": {},
+      "node_params": {},
+      "auto_flow": true,
+      "enable_complete_node_task": false,
+      "output_variable": "",
+      "enable_reject_upstream": false,
+      "max_reject_count": 3,
+      "save_output_to_file": true,
+      "output_file_path": "cache/story_plan/style_profile.json",
+      "sub_workflow_params": {},
+      "fail_auto_skip": false
+    },
+    {
+      "id": "script_persist_story_plan",
+      "label": "故事规划落库",
+      "node_type": "script",
+      "agent_type": "default",
+      "system_prompt_template": "",
+      "first_message": "",
+      "position": {
+        "x": 140,
+        "y": 290
+      },
+      "var_bindings": {},
+      "node_params": {
+        "script_source": "library",
+        "script_type": "python",
+        "script_name": "json_to_db",
+        "script_args": "--action upsert-story-plan --book-id '{{book_id}}' --story-plan 'cache/story_plan/story_plan.json' --workflow-id {{_system.workflow_id}} --workflow-task-id {{_system.task_id}}",
+        "timeout": "30",
+        "script_group": "nvl"
+      },
+      "auto_flow": false,
+      "enable_complete_node_task": true,
+      "output_variable": "",
+      "enable_reject_upstream": false,
+      "max_reject_count": 3,
+      "save_output_to_file": false,
+      "output_file_path": "",
+      "sub_workflow_params": {},
+      "fail_auto_skip": false
+    },
+    {
+      "id": "script_persist_style_profile",
+      "label": "风格档案落库",
+      "node_type": "script",
+      "agent_type": "default",
+      "system_prompt_template": "",
+      "first_message": "",
+      "position": {
+        "x": 140,
+        "y": 390
+      },
+      "var_bindings": {},
+      "node_params": {
+        "script_source": "library",
+        "script_type": "python",
+        "script_name": "json_to_db",
+        "script_args": "--action upsert-style-profile --book-id '{{book_id}}' --style-profile 'cache/story_plan/style_profile.json' --workflow-id {{_system.workflow_id}} --workflow-task-id {{_system.task_id}}",
+        "timeout": "30",
+        "script_group": "nvl"
+      },
+      "auto_flow": false,
+      "enable_complete_node_task": true,
+      "output_variable": "",
+      "enable_reject_upstream": false,
+      "max_reject_count": 3,
+      "save_output_to_file": false,
+      "output_file_path": "",
+      "sub_workflow_params": {},
+      "fail_auto_skip": false
+    },
+    {
+      "id": "script_render_story_plan",
+      "label": "渲染 → story_plan.md",
+      "node_type": "script",
+      "agent_type": "default",
+      "system_prompt_template": "",
+      "first_message": "",
+      "position": {
+        "x": 390,
+        "y": 380
+      },
+      "var_bindings": {},
+      "node_params": {
+        "script_source": "library",
+        "script_type": "python",
+        "script_name": "db_sync",
+        "script_args": "--book-id '{{book_id}}' --render 'cache/story_plan/story_plan.json' --output 'meta/story_plan.md'",
+        "timeout": "30",
+        "script_group": "nvl"
+      },
+      "auto_flow": false,
+      "enable_complete_node_task": true,
+      "output_variable": "",
+      "enable_reject_upstream": false,
+      "max_reject_count": 3,
+      "save_output_to_file": false,
+      "output_file_path": "",
+      "sub_workflow_params": {},
+      "fail_auto_skip": false
+    },
+    {
+      "id": "script_render_style",
+      "label": "渲染 → style_profile.md",
+      "node_type": "script",
+      "agent_type": "default",
+      "system_prompt_template": "",
+      "first_message": "",
+      "position": {
+        "x": 390,
+        "y": 480
+      },
+      "var_bindings": {},
+      "node_params": {
+        "script_source": "library",
+        "script_type": "python",
+        "script_name": "db_sync",
+        "script_args": "--book-id '{{book_id}}' --render 'cache/story_plan/style_profile.json' --output 'meta/style_profile.md'",
+        "timeout": "30",
+        "script_group": "nvl"
+      },
+      "auto_flow": false,
+      "enable_complete_node_task": true,
+      "output_variable": "",
+      "enable_reject_upstream": false,
+      "max_reject_count": 3,
+      "save_output_to_file": false,
+      "output_file_path": "",
+      "sub_workflow_params": {},
+      "fail_auto_skip": false
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge-start-sync",
+      "source": "__start__",
+      "target": "script_sync_down"
+    },
+    {
+      "id": "edge-sync-planner",
+      "source": "script_sync_down",
+      "target": "agent_mpvb7xer_1"
+    },
+    {
+      "id": "edge-planner-persist-sp",
+      "source": "agent_mpvb7xer_1",
+      "target": "script_persist_story_plan"
+    },
+    {
+      "id": "edge-persist-sp-agent-style",
+      "source": "script_persist_story_plan",
+      "target": "agent_style"
+    },
+    {
+      "id": "edge-style-persist-spf",
+      "source": "agent_style",
+      "target": "script_persist_style_profile"
+    },
+    {
+      "id": "edge-persist-spf-render-sp",
+      "source": "script_persist_style_profile",
+      "target": "script_render_story_plan"
+    },
+    {
+      "id": "edge-ba5bf68b",
+      "source": "script_render_story_plan",
+      "target": "script_render_style"
+    },
+    {
+      "id": "edge-render-style-end",
+      "source": "script_render_style",
+      "target": "__end__"
+    }
+  ],
+  "variables": [
+    {
+      "key": "book_id",
+      "name": "书籍ID",
+      "type": "text",
+      "default": "",
+      "required": true,
+      "description": "书籍 UUID，建书 API 返回",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": false
+    },
+    {
+      "key": "premise",
+      "name": "题材创意",
+      "type": "textarea",
+      "default": "",
+      "required": true,
+      "description": "故事前提/创意，描述核心概念、主角设定等",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": false
+    },
+    {
+      "key": "genre",
+      "name": "题材类型",
+      "type": "text",
+      "default": "",
+      "required": true,
+      "description": "如：东方玄幻、都市异能、科幻末世、历史架空、悬疑推理 等",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": false
+    },
+    {
+      "key": "world_foundation",
+      "name": "世界观文件",
+      "type": "file",
+      "default": "meta/world_foundation.md",
+      "required": false,
+      "description": "build Workflow 产出的世界观汇总文档",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": true
+    },
+    {
+      "key": "character_profiles",
+      "name": "角色档案文件",
+      "type": "file",
+      "default": "meta/character_profiles.md",
+      "required": false,
+      "description": "character Workflow 产出的角色档案文档",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": true
+    },
+    {
+      "key": "story_plan_file",
+      "name": "故事引擎文件",
+      "type": "file",
+      "default": "cache/story_plan/story_plan.json",
+      "required": false,
+      "description": "故事宏观规划产出的 story_plan.json",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": true
+    },
+    {
+      "key": "language",
+      "name": "输出语言",
+      "type": "text",
+      "default": "中文",
+      "required": true,
+      "description": "所有 agent 的产出语言。中文 / English",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": false
+    }
+  ],
+  "gateways": [],
+  "execution_schemes": [],
+  "start_position": {
+    "x": 300,
+    "y": 50
+  },
+  "end_position": {
+    "x": 380,
+    "y": 610
+  }
+}

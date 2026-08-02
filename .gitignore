@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.venv/
+/dist/
+/build/
+plugins/*/dist/
+plugins/*/build/
+
+# Local configuration and runtime data
+.env
+data/
+logs/
+cache/
+
+# Editors and operating systems
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

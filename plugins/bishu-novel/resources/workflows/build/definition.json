@@ -1,0 +1,546 @@
+{
+  "workflow_id": "build",
+  "name": "世界观构建管线",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "agent_corelaws",
+      "label": "维度一：核心法则",
+      "node_type": "agent",
+      "agent_type": "novel-worldbuilder-corelaws",
+      "system_prompt_template": "",
+      "first_message": "【题材创意】\n{{premise}}\n\n【题材类型】\n{{genre}}\n\n请生成世界观维度一：核心法则。这决定整个世界的底层运行逻辑。\n\n输出语言：{{language}}。你的所有产出内容——包括文件内容、JSON 字段值、分析报告——都必须使用 {{language}}。",
+      "position": {
+        "x": -60,
+        "y": 100
+      },
+      "var_bindings": {},
+      "node_params": {},
+      "auto_flow": true,
+      "enable_complete_node_task": false,
+      "output_variable": "agent_corelaws_output",
+      "enable_reject_upstream": false,
+      "max_reject_count": 3,
+      "save_output_to_file": true,
+      "output_file_path": "world/core_laws.json",
+      "sub_workflow_params": {},
+      "fail_auto_skip": false
+    },
+    {
+      "id": "agent_spacetime",
+      "label": "维度二：时空地理",
+      "node_type": "agent",
+      "agent_type": "novel-worldbuilder-spacetime",
+      "system_prompt_template": "",
+      "first_message": "【题材创意】\n{{premise}}\n\n【题材类型】\n{{genre}}\n\n【前序维度】\n核心法则：\n{{agent_corelaws_output}}\n\n请根据以上信息，生成世界观维度二：时空地理。你的设定必须与已确立的核心法则相容。\n\n输出语言：{{language}}。你的所有产出内容——包括文件内容、JSON 字段值、分析报告——都必须使用 {{language}}。",
+      "position": {
+        "x": 260,
+        "y": 130
+      },
+      "var_bindings": {},
+      "node_params": {},
+      "auto_flow": true,
+      "enable_complete_node_task": false,
+      "output_variable": "agent_spacetime_output",
+      "enable_reject_upstream": false,
+      "max_reject_count": 3,
+      "save_output_to_file": true,
+      "output_file_path": "world/space_time.json",
+      "sub_workflow_params": {},
+      "fail_auto_skip": false
+    },
+    {
+      "id": "agent_society",
+      "label": "维度三：社会权力",
+      "node_type": "agent",
+      "agent_type": "novel-worldbuilder-society",
+      "system_prompt_template": "",
+      "first_message": "【题材创意】\n{{premise}}\n\n【题材类型】\n{{genre}}\n\n【前序维度】\n核心法则：\n{{agent_corelaws_output}}\n时空地理：\n{{agent_spacetime_output}}\n\n请根据以上信息，生成世界观维度三：社会权力。你的设定必须与已确立的前序维度相容。\n\n输出语言：{{language}}。你的所有产出内容——包括文件内容、JSON 字段值、分析报告——都必须使用 {{language}}。",
+      "position": {
+        "x": 570,
+        "y": 140
+      },
+      "var_bindings": {},
+      "node_params": {},
+      "auto_flow": true,
+      "enable_complete_node_task": false,
+      "output_variable": "agent_society_output",
+      "enable_reject_upstream": false,
+      "max_reject_count": 3,
+      "save_output_to_file": true,
+      "output_file_path": "world/society.json",
+      "sub_workflow_params": {},
+      "fail_auto_skip": false
+    },
+    {
+      "id": "agent_historyculture",
+      "label": "维度四：历史文化",
+      "node_type": "agent",
+      "agent_type": "novel-worldbuilder-historyculture",
+      "system_prompt_template": "",
+      "first_message": "【题材创意】\n{{premise}}\n\n【题材类型】\n{{genre}}\n\n【前序维度】\n核心法则：\n{{agent_corelaws_output}}\n时空地理：\n{{agent_spacetime_output}}\n社会权力：\n{{agent_society_output}}\n\n请根据以上信息，生成世界观维度四：历史文化。你的设定必须与已确立的前序维度相容。\n\n输出语言：{{language}}。你的所有产出内容——包括文件内容、JSON 字段值、分析报告——都必须使用 {{language}}。",
+      "position": {
+        "x": -90,
+        "y": 350
+      },
+      "var_bindings": {},
+      "node_params": {},
+      "auto_flow": true,
+      "enable_complete_node_task": false,
+      "output_variable": "agent_historyculture_output",
+      "enable_reject_upstream": false,
+      "max_reject_count": 3,
+      "save_output_to_file": true,
+      "output_file_path": "world/history_culture.json",
+      "sub_workflow_params": {},
+      "fail_auto_skip": false
+    },
+    {
+      "id": "agent_existence",
+      "label": "维度五：存在基础",
+      "node_type": "agent",
+      "agent_type": "novel-worldbuilder-existence",
+      "system_prompt_template": "",
+      "first_message": "【题材创意】\n{{premise}}\n\n【题材类型】\n{{genre}}\n\n【前序维度】\n核心法则：\n{{agent_corelaws_output}}\n时空地理：\n{{agent_spacetime_output}}\n社会权力：\n{{agent_society_output}}\n历史文化：\n{{agent_historyculture_output}}\n\n请根据以上信息，生成世界观维度五：存在基础。你的设定必须与已确立的前序维度相容。\n\n输出语言：{{language}}。你的所有产出内容——包括文件内容、JSON 字段值、分析报告——都必须使用 {{language}}。",
+      "position": {
+        "x": 240,
+        "y": 350
+      },
+      "var_bindings": {},
+      "node_params": {},
+      "auto_flow": true,
+      "enable_complete_node_task": false,
+      "output_variable": "agent_existence_output",
+      "enable_reject_upstream": false,
+      "max_reject_count": 3,
+      "save_output_to_file": true,
+      "output_file_path": "world/existence.json",
+      "sub_workflow_params": {},
+      "fail_auto_skip": false
+    },
+    {
+      "id": "agent_information",
+      "label": "维度六：信息传播",
+      "node_type": "agent",
+      "agent_type": "novel-worldbuilder-information",
+      "system_prompt_template": "",
+      "first_message": "【题材创意】\n{{premise}}\n\n【题材类型】\n{{genre}}\n\n【前序维度】\n核心法则：\n{{agent_corelaws_output}}\n时空地理：\n{{agent_spacetime_output}}\n社会权力：\n{{agent_society_output}}\n历史文化：\n{{agent_historyculture_output}}\n存在基础：\n{{agent_existence_output}}\n\n请根据以上信息，生成世界观维度六：信息传播。你的设定必须与已确立的前五维度相容。\n\n输出语言：{{language}}。你的所有产出内容——包括文件内容、JSON 字段值、分析报告——都必须使用 {{language}}。",
+      "position": {
+        "x": 530,
+        "y": 380
+      },
+      "var_bindings": {},
+      "node_params": {},
+      "auto_flow": true,
+      "enable_complete_node_task": false,
+      "output_variable": "",
+      "enable_reject_upstream": false,
+      "max_reject_count": 3,
+      "save_output_to_file": true,
+      "output_file_path": "world/information.json",
+      "sub_workflow_params": {},
+      "fail_auto_skip": false
+    },
+    {
+      "id": "script_merge_world",
+      "label": "拼接世界观文档",
+      "node_type": "script",
+      "agent_type": "default",
+      "system_prompt_template": "",
+      "first_message": "",
+      "position": {
+        "x": 540,
+        "y": 600
+      },
+      "var_bindings": {},
+      "node_params": {
+        "script_source": "inline",
+        "script_type": "python",
+        "script_name": "render_worldview",
+        "script_args": "--input-dir 'world' --output 'meta/world_foundation.md' --title '世界观基础'",
+        "timeout": "30"
+      },
+      "auto_flow": false,
+      "enable_complete_node_task": true,
+      "output_variable": "",
+      "enable_reject_upstream": false,
+      "max_reject_count": 3,
+      "save_output_to_file": false,
+      "output_file_path": "",
+      "sub_workflow_params": {},
+      "fail_auto_skip": false
+    },
+    {
+      "id": "script_persist_corelaws",
+      "label": "写入数据库：核心法则",
+      "node_type": "script",
+      "agent_type": "default",
+      "system_prompt_template": "",
+      "first_message": "",
+      "position": {
+        "x": -30,
+        "y": 220
+      },
+      "var_bindings": {},
+      "node_params": {
+        "script_source": "library",
+        "script_type": "python",
+        "script_group": "nvl",
+        "script_name": "json_to_db",
+        "script_args": "--book-id {{book_id}} --action upsert-world-dimension --dimension core_laws world/core_laws.json --workflow-id {{_system.workflow_id}} --workflow-task-id {{_system.task_id}}",
+        "timeout": "30"
+      },
+      "auto_flow": false,
+      "enable_complete_node_task": true,
+      "output_variable": "",
+      "enable_reject_upstream": false,
+      "max_reject_count": 3,
+      "save_output_to_file": false,
+      "output_file_path": "",
+      "sub_workflow_params": {},
+      "fail_auto_skip": false
+    },
+    {
+      "id": "script_persist_spacetime",
+      "label": "写入数据库：时空地理",
+      "node_type": "script",
+      "agent_type": "default",
+      "system_prompt_template": "",
+      "first_message": "",
+      "position": {
+        "x": 270,
+        "y": 230
+      },
+      "var_bindings": {},
+      "node_params": {
+        "script_source": "library",
+        "script_type": "python",
+        "script_group": "nvl",
+        "script_name": "json_to_db",
+        "script_args": "--book-id {{book_id}} --action upsert-world-dimension --dimension space_time world/space_time.json --workflow-id {{_system.workflow_id}} --workflow-task-id {{_system.task_id}}",
+        "timeout": "30"
+      },
+      "auto_flow": false,
+      "enable_complete_node_task": true,
+      "output_variable": "",
+      "enable_reject_upstream": false,
+      "max_reject_count": 3,
+      "save_output_to_file": false,
+      "output_file_path": "",
+      "sub_workflow_params": {},
+      "fail_auto_skip": false
+    },
+    {
+      "id": "script_persist_society",
+      "label": "写入数据库：社会权力结构",
+      "node_type": "script",
+      "agent_type": "default",
+      "system_prompt_template": "",
+      "first_message": "",
+      "position": {
+        "x": 590,
+        "y": 250
+      },
+      "var_bindings": {},
+      "node_params": {
+        "script_source": "library",
+        "script_type": "python",
+        "script_group": "nvl",
+        "script_name": "json_to_db",
+        "script_args": "--book-id {{book_id}} --action upsert-world-dimension --dimension society world/society.json --workflow-id {{_system.workflow_id}} --workflow-task-id {{_system.task_id}}",
+        "timeout": "30"
+      },
+      "auto_flow": false,
+      "enable_complete_node_task": true,
+      "output_variable": "",
+      "enable_reject_upstream": false,
+      "max_reject_count": 3,
+      "save_output_to_file": false,
+      "output_file_path": "",
+      "sub_workflow_params": {},
+      "fail_auto_skip": false
+    },
+    {
+      "id": "script_persist_historyculture",
+      "label": "写入数据库：历史文化",
+      "node_type": "script",
+      "agent_type": "default",
+      "system_prompt_template": "",
+      "first_message": "",
+      "position": {
+        "x": -30,
+        "y": 450
+      },
+      "var_bindings": {},
+      "node_params": {
+        "script_source": "library",
+        "script_type": "python",
+        "script_group": "nvl",
+        "script_name": "json_to_db",
+        "script_args": "--book-id {{book_id}} --action upsert-world-dimension --dimension history_culture world/history_culture.json --workflow-id {{_system.workflow_id}} --workflow-task-id {{_system.task_id}}",
+        "timeout": "30"
+      },
+      "auto_flow": false,
+      "enable_complete_node_task": true,
+      "output_variable": "",
+      "enable_reject_upstream": false,
+      "max_reject_count": 3,
+      "save_output_to_file": false,
+      "output_file_path": "",
+      "sub_workflow_params": {},
+      "fail_auto_skip": false
+    },
+    {
+      "id": "script_persist_existence",
+      "label": "写入数据库：存在基础",
+      "node_type": "script",
+      "agent_type": "default",
+      "system_prompt_template": "",
+      "first_message": "",
+      "position": {
+        "x": 270,
+        "y": 460
+      },
+      "var_bindings": {},
+      "node_params": {
+        "script_source": "library",
+        "script_type": "python",
+        "script_group": "nvl",
+        "script_name": "json_to_db",
+        "script_args": "--book-id {{book_id}} --action upsert-world-dimension --dimension existence world/existence.json --workflow-id {{_system.workflow_id}} --workflow-task-id {{_system.task_id}}",
+        "timeout": "30"
+      },
+      "auto_flow": false,
+      "enable_complete_node_task": true,
+      "output_variable": "",
+      "enable_reject_upstream": false,
+      "max_reject_count": 3,
+      "save_output_to_file": false,
+      "output_file_path": "",
+      "sub_workflow_params": {},
+      "fail_auto_skip": false
+    },
+    {
+      "id": "script_persist_information",
+      "label": "写入数据库：信息传播结构",
+      "node_type": "script",
+      "agent_type": "default",
+      "system_prompt_template": "",
+      "first_message": "",
+      "position": {
+        "x": 580,
+        "y": 470
+      },
+      "var_bindings": {},
+      "node_params": {
+        "script_source": "library",
+        "script_type": "python",
+        "script_group": "nvl",
+        "script_name": "json_to_db",
+        "script_args": "--book-id {{book_id}} --action upsert-world-dimension --dimension information world/information.json --workflow-id {{_system.workflow_id}} --workflow-task-id {{_system.task_id}}",
+        "timeout": "30"
+      },
+      "auto_flow": false,
+      "enable_complete_node_task": true,
+      "output_variable": "",
+      "enable_reject_upstream": false,
+      "max_reject_count": 3,
+      "save_output_to_file": false,
+      "output_file_path": "",
+      "sub_workflow_params": {},
+      "fail_auto_skip": false
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge-__start__-agent_corelaws",
+      "source": "__start__",
+      "target": "agent_corelaws"
+    },
+    {
+      "id": "edge-agent_corelaws-script_persist_corelaws",
+      "source": "agent_corelaws",
+      "target": "script_persist_corelaws"
+    },
+    {
+      "id": "edge-script_persist_corelaws-agent_spacetime",
+      "source": "script_persist_corelaws",
+      "target": "agent_spacetime"
+    },
+    {
+      "id": "edge-agent_spacetime-script_persist_spacetime",
+      "source": "agent_spacetime",
+      "target": "script_persist_spacetime"
+    },
+    {
+      "id": "edge-script_persist_spacetime-agent_society",
+      "source": "script_persist_spacetime",
+      "target": "agent_society"
+    },
+    {
+      "id": "edge-agent_society-script_persist_society",
+      "source": "agent_society",
+      "target": "script_persist_society"
+    },
+    {
+      "id": "edge-script_persist_society-agent_historyculture",
+      "source": "script_persist_society",
+      "target": "agent_historyculture"
+    },
+    {
+      "id": "edge-agent_historyculture-script_persist_historyculture",
+      "source": "agent_historyculture",
+      "target": "script_persist_historyculture"
+    },
+    {
+      "id": "edge-script_persist_historyculture-agent_existence",
+      "source": "script_persist_historyculture",
+      "target": "agent_existence"
+    },
+    {
+      "id": "edge-agent_existence-script_persist_existence",
+      "source": "agent_existence",
+      "target": "script_persist_existence"
+    },
+    {
+      "id": "edge-script_persist_existence-agent_information",
+      "source": "script_persist_existence",
+      "target": "agent_information"
+    },
+    {
+      "id": "edge-agent_information-script_persist_information",
+      "source": "agent_information",
+      "target": "script_persist_information"
+    },
+    {
+      "id": "edge-script_persist_information-script_merge_world",
+      "source": "script_persist_information",
+      "target": "script_merge_world"
+    },
+    {
+      "id": "edge-script_merge_world-__end__",
+      "source": "script_merge_world",
+      "target": "__end__"
+    }
+  ],
+  "variables": [
+    {
+      "key": "premise",
+      "name": "题材创意",
+      "type": "textarea",
+      "default": "",
+      "required": true,
+      "description": "用户建书时输入的创意内容，描述故事前提、主角设定、核心概念等",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": false
+    },
+    {
+      "key": "genre",
+      "name": "题材类型",
+      "type": "text",
+      "default": "",
+      "required": true,
+      "description": "如：东方玄幻、都市异能、科幻末世、历史架空、悬疑推理 等",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": false
+    },
+    {
+      "key": "agent_corelaws_output",
+      "name": "维度一：核心法则 输出",
+      "type": "text",
+      "default": "",
+      "required": false,
+      "description": "",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": true
+    },
+    {
+      "key": "agent_spacetime_output",
+      "name": "维度二：时空地理 输出",
+      "type": "text",
+      "default": "",
+      "required": false,
+      "description": "",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": true
+    },
+    {
+      "key": "agent_society_output",
+      "name": "维度三：社会权力 输出",
+      "type": "text",
+      "default": "",
+      "required": false,
+      "description": "",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": true
+    },
+    {
+      "key": "agent_historyculture_output",
+      "name": "维度四：历史文化 输出",
+      "type": "text",
+      "default": "",
+      "required": false,
+      "description": "",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": true
+    },
+    {
+      "key": "agent_existence_output",
+      "name": "维度五：存在基础 输出",
+      "type": "text",
+      "default": "",
+      "required": false,
+      "description": "",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": true
+    },
+    {
+      "key": "language",
+      "name": "输出语言",
+      "type": "text",
+      "default": "中文",
+      "required": true,
+      "description": "所有 agent 的产出语言。中文 / English",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": false
+    },
+    {
+      "key": "book_id",
+      "name": "书 ID",
+      "type": "text",
+      "default": "",
+      "required": true,
+      "description": "UUID，book 表中已创建的书",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": false
+    }
+  ],
+  "gateways": [],
+  "execution_schemes": [],
+  "start_position": {
+    "x": 300,
+    "y": 50
+  },
+  "end_position": {
+    "x": 300,
+    "y": 550
+  }
+}

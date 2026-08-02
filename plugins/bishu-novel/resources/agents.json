@@ -1,0 +1,774 @@
+{
+  "version": "1.0",
+  "description": "Agent 定义配置 - 所有 Agent 类型的定义",
+  "agents": {
+    "novel-volume-outliner": {
+      "description": "卷纲规划者：定义整卷的叙事边界、三幕结构、关键节点、出场角色，产出 volume_outline.md",
+      "prompt_template": "novel-volume-outliner",
+      "tools": null,
+      "disallowed_tools": null,
+      "model": "deepseek:deepseek-v4-flash",
+      "max_turns": 60,
+      "system_prompt_template": "",
+      "copy_main_workspace": false,
+      "available_for_sub_session": true,
+      "visible_skill_group_ids": [],
+      "visible_rule_group_ids": [],
+      "model_params": {
+        "thinking_enabled": true,
+        "reasoning_effort": "high",
+        "temperature": 0.9,
+        "top_p": 1,
+        "presence_penalty": 0,
+        "thinking_budget": null,
+        "response_format": {
+          "type": "json_object"
+        }
+      }
+    },
+    "novel-director": {
+      "description": "大纲导演：为每章制定镜头分配与伏笔操作，管理卷大纲和近期大纲，定义信息黑洞（创作留白），产出单章指导",
+      "prompt_template": "novel-director",
+      "tools": null,
+      "disallowed_tools": null,
+      "model": "deepseek:deepseek-v4-flash",
+      "max_turns": 80,
+      "system_prompt_template": "",
+      "copy_main_workspace": false,
+      "available_for_sub_session": true,
+      "visible_skill_group_ids": [],
+      "visible_rule_group_ids": [],
+      "model_params": {
+        "thinking_enabled": true,
+        "reasoning_effort": "high",
+        "temperature": 0.9,
+        "top_p": 1,
+        "presence_penalty": 0,
+        "thinking_budget": null,
+        "response_format": {
+          "type": "json_object"
+        }
+      }
+    },
+    "novel-writer": {
+      "description": "写手：产出带SLOT标记的叙事骨架JSON，由下游专项写手填充",
+      "prompt_template": "novel-writer",
+      "tools": null,
+      "disallowed_tools": null,
+      "model": "alibaba:qwen3.7-max",
+      "max_turns": 120,
+      "system_prompt_template": "",
+      "copy_main_workspace": false,
+      "available_for_sub_session": true,
+      "visible_skill_group_ids": [],
+      "visible_rule_group_ids": [],
+      "model_params": {
+        "thinking_enabled": true,
+        "reasoning_effort": "high",
+        "temperature": 0.8,
+        "top_p": 1,
+        "presence_penalty": 0,
+        "thinking_budget": null,
+        "response_format": {
+          "type": "json_object"
+        }
+      }
+    },
+    "novel-observer": {
+      "description": "世界状态机：维护世界状态全量快照和事件日志，管理势力动态与暗线运行，推进世界时间，为大纲导演提供叙事物理引擎",
+      "prompt_template": "novel-observer",
+      "tools": null,
+      "disallowed_tools": null,
+      "model": "deepseek:deepseek-v4-flash",
+      "max_turns": 60,
+      "system_prompt_template": "",
+      "copy_main_workspace": false,
+      "available_for_sub_session": true,
+      "visible_skill_group_ids": [],
+      "visible_rule_group_ids": [],
+      "model_params": {
+        "thinking_enabled": true,
+        "reasoning_effort": "high",
+        "temperature": 0.3,
+        "top_p": 1,
+        "presence_penalty": 0,
+        "thinking_budget": null,
+        "response_format": {
+          "type": "json_object"
+        }
+      }
+    },
+    "novel-settler": {
+      "description": "意图导演",
+      "prompt_template": "novel-settler",
+      "tools": null,
+      "disallowed_tools": null,
+      "model": "deepseek:deepseek-v4-flash",
+      "max_turns": 80,
+      "system_prompt_template": "",
+      "copy_main_workspace": false,
+      "available_for_sub_session": true,
+      "visible_skill_group_ids": [],
+      "visible_rule_group_ids": [],
+      "model_params": {
+        "thinking_enabled": true,
+        "reasoning_effort": "high",
+        "temperature": 0.8,
+        "top_p": 1,
+        "presence_penalty": 0,
+        "thinking_budget": null,
+        "response_format": {
+          "type": "json_object"
+        }
+      }
+    },
+    "novel-character-maintainer": {
+      "description": "角色状态维护师：读取大纲、世界观、角色档案等硬性文件，产出长线角色状态（character_state_long.md）和次要角色库（character_minor.md）",
+      "prompt_template": "novel-character-maintainer",
+      "tools": null,
+      "disallowed_tools": null,
+      "model": "deepseek:deepseek-v4-flash",
+      "max_turns": 60,
+      "system_prompt_template": "",
+      "copy_main_workspace": false,
+      "available_for_sub_session": true,
+      "visible_skill_group_ids": [],
+      "visible_rule_group_ids": [],
+      "model_params": {
+        "thinking_enabled": true,
+        "reasoning_effort": "high",
+        "temperature": 0.3,
+        "top_p": 1,
+        "presence_penalty": 0,
+        "thinking_budget": null,
+        "response_format": {
+          "type": "json_object"
+        }
+      }
+    },
+    "novel-storyboard-integrator": {
+      "description": "整合写手：填过渡槽 + 拼装骨架与专项写手产出，产出完整章节正文",
+      "prompt_template": "novel-storyboard-integrator",
+      "tools": null,
+      "disallowed_tools": null,
+      "model": "alibaba:qwen3.7-max",
+      "max_turns": 40,
+      "system_prompt_template": "",
+      "copy_main_workspace": false,
+      "available_for_sub_session": true,
+      "visible_skill_group_ids": [],
+      "visible_rule_group_ids": [],
+      "model_params": {
+        "thinking_enabled": true,
+        "reasoning_effort": "high",
+        "temperature": 0.4,
+        "top_p": 1,
+        "presence_penalty": 0,
+        "thinking_budget": 4000,
+        "response_format": {
+          "type": "json_object"
+        }
+      }
+    },
+    "novel-dialogue-writer": {
+      "description": "对话写手：根据骨架中的对话槽，结合角色声音锚写出有潜台词的自然对白",
+      "prompt_template": "novel-dialogue-writer",
+      "tools": null,
+      "disallowed_tools": null,
+      "model": "deepseek:deepseek-v4-pro",
+      "max_turns": 40,
+      "system_prompt_template": "",
+      "copy_main_workspace": false,
+      "available_for_sub_session": true,
+      "visible_skill_group_ids": [],
+      "visible_rule_group_ids": [],
+      "model_params": {
+        "thinking_enabled": true,
+        "reasoning_effort": "high",
+        "temperature": 0.8,
+        "top_p": 1,
+        "presence_penalty": 0,
+        "thinking_budget": null,
+        "response_format": {
+          "type": "json_object"
+        }
+      }
+    },
+    "novel-action-writer": {
+      "description": "动作写手：根据骨架中的动作槽，结合分镜节奏写出有冲击力的动作和肢体描写",
+      "prompt_template": "novel-action-writer",
+      "tools": null,
+      "disallowed_tools": null,
+      "model": "deepseek:deepseek-v4-pro",
+      "max_turns": 40,
+      "system_prompt_template": "",
+      "copy_main_workspace": false,
+      "available_for_sub_session": true,
+      "visible_skill_group_ids": [],
+      "visible_rule_group_ids": [],
+      "model_params": {
+        "thinking_enabled": true,
+        "reasoning_effort": "high",
+        "temperature": 0.8,
+        "top_p": 1,
+        "presence_penalty": 0,
+        "thinking_budget": null,
+        "response_format": {
+          "type": "json_object"
+        }
+      }
+    },
+    "novel-internal-writer": {
+      "description": "内心写手：根据骨架中的内心槽，结合角色情感上下文写出真实的意识流",
+      "prompt_template": "novel-internal-writer",
+      "tools": null,
+      "disallowed_tools": null,
+      "model": "mimo:mimo-v2.5-pro",
+      "max_turns": 40,
+      "system_prompt_template": "",
+      "copy_main_workspace": false,
+      "available_for_sub_session": true,
+      "visible_skill_group_ids": [],
+      "visible_rule_group_ids": [],
+      "model_params": {
+        "thinking_enabled": true,
+        "reasoning_effort": "high",
+        "temperature": 0.8,
+        "top_p": 1,
+        "presence_penalty": 0,
+        "thinking_budget": null,
+        "response_format": {
+          "type": "json_object"
+        }
+      }
+    },
+    "novel-description-writer": {
+      "description": "描写写手：根据骨架中的描写槽，结合分镜和风格指南写出多义性的环境描写",
+      "prompt_template": "novel-description-writer",
+      "tools": null,
+      "disallowed_tools": null,
+      "model": "mimo:mimo-v2.5-pro",
+      "max_turns": 40,
+      "system_prompt_template": "",
+      "copy_main_workspace": false,
+      "available_for_sub_session": true,
+      "visible_skill_group_ids": [],
+      "visible_rule_group_ids": [],
+      "model_params": {
+        "thinking_enabled": true,
+        "reasoning_effort": "high",
+        "temperature": 0.8,
+        "top_p": 1,
+        "presence_penalty": 0,
+        "thinking_budget": null,
+        "response_format": {
+          "type": "json_object"
+        }
+      }
+    },
+    "novel-single-writer": {
+      "description": "单写手：一稿成型——叙事、对话、动作、内心、描写一次完成，写的同时做编辑判断。写手群的分支替代版本",
+      "prompt_template": "novel-single-writer",
+      "tools": null,
+      "disallowed_tools": null,
+      "model": "deepseek:deepseek-v4-pro",
+      "max_turns": 1,
+      "system_prompt_template": "",
+      "copy_main_workspace": false,
+      "available_for_sub_session": true,
+      "visible_skill_group_ids": [],
+      "visible_rule_group_ids": [],
+      "model_params": {
+        "thinking_enabled": true,
+        "reasoning_effort": "high",
+        "temperature": 0.8,
+        "top_p": 1,
+        "presence_penalty": 0,
+        "thinking_budget": null,
+        "response_format": {
+          "type": "json_object"
+        }
+      }
+    },
+    "novel-outliner": {
+      "description": "近期大纲规划者：将卷大纲翻译为可执行的15章章节规划，产出 near_term_outline.md",
+      "prompt_template": "novel-outliner",
+      "tools": null,
+      "disallowed_tools": null,
+      "model": "deepseek:deepseek-v4-flash",
+      "max_turns": 60,
+      "system_prompt_template": "",
+      "copy_main_workspace": false,
+      "available_for_sub_session": true,
+      "visible_skill_group_ids": [],
+      "visible_rule_group_ids": [],
+      "model_params": {
+        "thinking_enabled": true,
+        "reasoning_effort": "high",
+        "temperature": 0.9,
+        "top_p": 1,
+        "presence_penalty": 0,
+        "thinking_budget": null,
+        "response_format": {
+          "type": "json_object"
+        }
+      }
+    },
+    "novel-worldbuilder-corelaws": {
+      "description": "世界观维度一·核心法则 — 根据题材创意定义世界的底层规则：力量体系、世界公理、禁忌红线、力量显象",
+      "prompt_template": "novel-worldbuilder-corelaws",
+      "tools": null,
+      "disallowed_tools": null,
+      "model": "deepseek:deepseek-v4-flash",
+      "max_turns": 60,
+      "system_prompt_template": "",
+      "copy_main_workspace": false,
+      "available_for_sub_session": true,
+      "visible_skill_group_ids": [],
+      "visible_rule_group_ids": [],
+      "model_params": {
+        "thinking_enabled": true,
+        "reasoning_effort": "high",
+        "temperature": 0.7,
+        "top_p": 1,
+        "response_format": {
+          "type": "json_object"
+        }
+      }
+    },
+    "novel-worldbuilder-spacetime": {
+      "description": "世界观维度二·时空地理 — 根据核心法则构建空间格局、关键地点、生态与时代背景",
+      "prompt_template": "novel-worldbuilder-spacetime",
+      "tools": null,
+      "disallowed_tools": null,
+      "model": "deepseek:deepseek-v4-flash",
+      "max_turns": 60,
+      "system_prompt_template": "",
+      "copy_main_workspace": false,
+      "available_for_sub_session": true,
+      "visible_skill_group_ids": [],
+      "visible_rule_group_ids": [],
+      "model_params": {
+        "thinking_enabled": true,
+        "reasoning_effort": "high",
+        "temperature": 0.7,
+        "top_p": 1,
+        "response_format": {
+          "type": "json_object"
+        }
+      }
+    },
+    "novel-worldbuilder-society": {
+      "description": "世界观维度三·社会权力 — 构建种族、阶层、政体、势力格局与关系网络",
+      "prompt_template": "novel-worldbuilder-society",
+      "tools": null,
+      "disallowed_tools": null,
+      "model": "deepseek:deepseek-v4-flash",
+      "max_turns": 60,
+      "system_prompt_template": "",
+      "copy_main_workspace": false,
+      "available_for_sub_session": true,
+      "visible_skill_group_ids": [],
+      "visible_rule_group_ids": [],
+      "model_params": {
+        "thinking_enabled": true,
+        "reasoning_effort": "high",
+        "temperature": 0.7,
+        "top_p": 1,
+        "response_format": {
+          "type": "json_object"
+        }
+      }
+    },
+    "novel-worldbuilder-historyculture": {
+      "description": "世界观维度四·历史文化 — 构建历史事件、宗教、习俗、经济基础与日常剖面",
+      "prompt_template": "novel-worldbuilder-historyculture",
+      "tools": null,
+      "disallowed_tools": null,
+      "model": "deepseek:deepseek-v4-flash",
+      "max_turns": 60,
+      "system_prompt_template": "",
+      "copy_main_workspace": false,
+      "available_for_sub_session": true,
+      "visible_skill_group_ids": [],
+      "visible_rule_group_ids": [],
+      "model_params": {
+        "thinking_enabled": true,
+        "reasoning_effort": "high",
+        "temperature": 0.7,
+        "top_p": 1,
+        "response_format": {
+          "type": "json_object"
+        }
+      }
+    },
+    "novel-worldbuilder-existence": {
+      "description": "世界观维度五·存在基础 — 定义历法体系、寿命与衰老、死亡方式、疾病与繁衍",
+      "prompt_template": "novel-worldbuilder-existence",
+      "tools": null,
+      "disallowed_tools": null,
+      "model": "deepseek:deepseek-v4-flash",
+      "max_turns": 60,
+      "system_prompt_template": "",
+      "copy_main_workspace": false,
+      "available_for_sub_session": true,
+      "visible_skill_group_ids": [],
+      "visible_rule_group_ids": [],
+      "model_params": {
+        "thinking_enabled": true,
+        "reasoning_effort": "high",
+        "temperature": 0.7,
+        "top_p": 1,
+        "response_format": {
+          "type": "json_object"
+        }
+      }
+    },
+    "novel-worldbuilder-information": {
+      "description": "世界观维度六·信息传播 — 定义信息速度、知识载体、信息壁垒与传播失真",
+      "prompt_template": "novel-worldbuilder-information",
+      "tools": null,
+      "disallowed_tools": null,
+      "model": "deepseek:deepseek-v4-flash",
+      "max_turns": 60,
+      "system_prompt_template": "",
+      "copy_main_workspace": false,
+      "available_for_sub_session": true,
+      "visible_skill_group_ids": [],
+      "visible_rule_group_ids": [],
+      "model_params": {
+        "thinking_enabled": true,
+        "reasoning_effort": "high",
+        "temperature": 0.7,
+        "top_p": 1,
+        "response_format": {
+          "type": "json_object"
+        }
+      }
+    },
+    "novel-character-skeleton": {
+      "description": "角色阵容架构师：根据世界观确定角色阵容、世界位置、关系网络，产出 character_skeleton.json",
+      "prompt_template": "novel-character-skeleton",
+      "tools": null,
+      "disallowed_tools": null,
+      "model": "deepseek:deepseek-v4-flash",
+      "max_turns": 60,
+      "system_prompt_template": "",
+      "copy_main_workspace": false,
+      "available_for_sub_session": true,
+      "visible_skill_group_ids": [],
+      "visible_rule_group_ids": [],
+      "model_params": {
+        "thinking_enabled": true,
+        "reasoning_effort": "high",
+        "temperature": 0.7,
+        "top_p": 1,
+        "response_format": {
+          "type": "json_object"
+        }
+      }
+    },
+    "novel-character-belief": {
+      "description": "角色信念系统架构师：为全体角色构建信念生态系统，产出 character_beliefs.json",
+      "prompt_template": "novel-character-belief",
+      "tools": null,
+      "disallowed_tools": null,
+      "model": "deepseek:deepseek-v4-flash",
+      "max_turns": 60,
+      "system_prompt_template": "",
+      "copy_main_workspace": false,
+      "available_for_sub_session": true,
+      "visible_skill_group_ids": [],
+      "visible_rule_group_ids": [],
+      "model_params": {
+        "thinking_enabled": true,
+        "reasoning_effort": "high",
+        "temperature": 0.7,
+        "top_p": 1,
+        "response_format": {
+          "type": "json_object"
+        }
+      }
+    },
+    "novel-character-deep": {
+      "description": "角色深层维度构建师：为单一角色构建欲望、恐惧、秘密、底线、创伤、矛盾、弧线，产出单个角色 JSON",
+      "prompt_template": "novel-character-deep",
+      "tools": null,
+      "disallowed_tools": null,
+      "model": "deepseek:deepseek-v4-flash",
+      "max_turns": 60,
+      "system_prompt_template": "",
+      "copy_main_workspace": false,
+      "available_for_sub_session": true,
+      "visible_skill_group_ids": [],
+      "visible_rule_group_ids": [],
+      "model_params": {
+        "thinking_enabled": true,
+        "reasoning_effort": "high",
+        "temperature": 0.7,
+        "top_p": 1,
+        "response_format": {
+          "type": "json_object"
+        }
+      }
+    },
+    "novel-story-planner": {
+      "description": "故事架构师 — 根据世界观和角色骨架，构建三层故事引擎：显性层（读者前三章的感知）、引擎层（驱动故事持续发展的核心机制）、兑现层（保证后续章节有料可写的蓝图）",
+      "prompt_template": "novel-story-planner",
+      "tools": null,
+      "disallowed_tools": null,
+      "model": "deepseek:deepseek-v4-flash",
+      "max_turns": 60,
+      "system_prompt_template": "",
+      "copy_main_workspace": false,
+      "available_for_sub_session": true,
+      "visible_skill_group_ids": [],
+      "visible_rule_group_ids": [],
+      "model_params": {
+        "thinking_enabled": true,
+        "reasoning_effort": "high",
+        "temperature": 0.3,
+        "top_p": 1,
+        "response_format": null
+      }
+    },
+    "novel-character-voice": {
+      "description": "角色声线分析师 — 从角色档案中提取每个角色的句法指纹、口头禅、认知偏差和情绪表达模式，产出 character_voice.md",
+      "prompt_template": "novel-character-voice",
+      "tools": null,
+      "disallowed_tools": null,
+      "model": "deepseek:deepseek-v4-flash",
+      "max_turns": 40,
+      "system_prompt_template": "",
+      "copy_main_workspace": false,
+      "available_for_sub_session": true,
+      "visible_skill_group_ids": [],
+      "visible_rule_group_ids": [],
+      "model_params": {
+        "thinking_enabled": true,
+        "reasoning_effort": "high",
+        "temperature": 0.3,
+        "top_p": 1,
+        "presence_penalty": 0,
+        "thinking_budget": null,
+        "response_format": {
+          "type": "json_object"
+        }
+      }
+    },
+    "novel-style-profiler": {
+      "description": "风格档案设计师 — 把故事引擎的 tone_reference 和题材翻译为可执行的风格指南（基调定位/风格锚定/叙事人格/文风戒律/题材笔法），产出 style_profile.md",
+      "prompt_template": "novel-style-profiler",
+      "tools": null,
+      "disallowed_tools": null,
+      "model": "deepseek:deepseek-v4-flash",
+      "max_turns": 40,
+      "system_prompt_template": "",
+      "copy_main_workspace": false,
+      "available_for_sub_session": true,
+      "visible_skill_group_ids": [],
+      "visible_rule_group_ids": [],
+      "model_params": {
+        "thinking_enabled": true,
+        "reasoning_effort": "high",
+        "temperature": 0.3,
+        "top_p": 1,
+        "presence_penalty": 0,
+        "thinking_budget": null,
+        "response_format": {
+          "type": "json_object"
+        }
+      }
+    },
+    "novel-self-critic": {
+      "description": "AI味自审 — 检测章节中的AI生成模式（10维扫描），产出critique notes供润色Agent使用",
+      "prompt_template": "novel-self-critic",
+      "tools": null,
+      "disallowed_tools": null,
+      "model": "deepseek:deepseek-v4-flash",
+      "max_turns": 40,
+      "system_prompt_template": "",
+      "copy_main_workspace": false,
+      "available_for_sub_session": true,
+      "visible_skill_group_ids": [],
+      "visible_rule_group_ids": [],
+      "model_params": {
+        "thinking_enabled": true,
+        "reasoning_effort": "high",
+        "temperature": 0.4,
+        "top_p": 0.7,
+        "presence_penalty": 0,
+        "thinking_budget": null,
+        "response_format": {
+          "type": "json_object"
+        }
+      }
+    },
+    "novel-polisher": {
+      "description": "人文化润色Agent — 让文本读起来像人写的，7项人文化优先级，保留优点同时添加人类不完美",
+      "prompt_template": "novel-polisher",
+      "tools": null,
+      "disallowed_tools": null,
+      "model": "deepseek:deepseek-v4-flash",
+      "max_turns": 60,
+      "system_prompt_template": "",
+      "copy_main_workspace": false,
+      "available_for_sub_session": true,
+      "visible_skill_group_ids": [],
+      "visible_rule_group_ids": [],
+      "model_params": {
+        "thinking_enabled": true,
+        "reasoning_effort": "high",
+        "temperature": 0.4,
+        "top_p": 0.8,
+        "presence_penalty": 0,
+        "thinking_budget": null,
+        "response_format": {
+          "type": "json_object"
+        }
+      }
+    },
+    "novel-professional-polisher": {
+      "description": "专业润色Agent — 7维职业编辑级润色（节奏/潜台词/动机/反重复/情感锚点/感知层次/最终润色），temp=0.7，输入仅需全文",
+      "prompt_template": "novel-professional-polisher",
+      "tools": null,
+      "disallowed_tools": null,
+      "model": "alibaba:qwen3.7-max",
+      "max_turns": 40,
+      "system_prompt_template": "",
+      "copy_main_workspace": false,
+      "available_for_sub_session": true,
+      "visible_skill_group_ids": [],
+      "visible_rule_group_ids": [],
+      "model_params": {
+        "thinking_enabled": true,
+        "reasoning_effort": "high",
+        "temperature": 0.7,
+        "top_p": 1,
+        "presence_penalty": 0,
+        "thinking_budget": null,
+        "response_format": {
+          "type": "json_object"
+        }
+      }
+    },
+    "novel-chapter-observer": {
+      "description": "章节观察员 — 读终稿+所有状态文件，逐条对照输出四类差异JSON（世界/故事/角色/未提事件），不做判断不裁决",
+      "prompt_template": "novel-chapter-observer",
+      "tools": null,
+      "disallowed_tools": null,
+      "model": "deepseek:deepseek-v4-flash",
+      "max_turns": 60,
+      "system_prompt_template": "",
+      "copy_main_workspace": false,
+      "available_for_sub_session": true,
+      "visible_skill_group_ids": [],
+      "visible_rule_group_ids": [],
+      "model_params": {
+        "thinking_enabled": true,
+        "reasoning_effort": "high",
+        "temperature": 0.3,
+        "top_p": 1,
+        "presence_penalty": 0,
+        "thinking_budget": null,
+        "response_format": {
+          "type": "json_object"
+        }
+      }
+    },
+    "novel-intent-distributor": {
+      "description": "意图分发器 — 读人类意图文件，按内容归类分发到 OD（情节）或 SE（写法），不做判断只做归类",
+      "prompt_template": "novel-intent-distributor",
+      "tools": null,
+      "disallowed_tools": null,
+      "model": "deepseek:deepseek-v4-flash",
+      "max_turns": 20,
+      "system_prompt_template": "",
+      "copy_main_workspace": false,
+      "available_for_sub_session": true,
+      "visible_skill_group_ids": [],
+      "visible_rule_group_ids": [],
+      "model_params": {
+        "thinking_enabled": false,
+        "reasoning_effort": "high",
+        "temperature": 0.3,
+        "top_p": 1,
+        "response_format": {
+          "type": "json_object"
+        }
+      }
+    },
+    "novel-transition-writer": {
+      "description": "过渡写手：根据骨架中的过渡槽，写出场景间的时间/空间/情绪过渡段落",
+      "prompt_template": "novel-transition-writer",
+      "tools": null,
+      "disallowed_tools": null,
+      "model": "mimo:mimo-v2.5-pro",
+      "max_turns": 40,
+      "system_prompt_template": "",
+      "copy_main_workspace": false,
+      "available_for_sub_session": true,
+      "visible_skill_group_ids": [],
+      "visible_rule_group_ids": [],
+      "model_params": {
+        "thinking_enabled": true,
+        "reasoning_effort": "high",
+        "temperature": 0.8,
+        "top_p": 1,
+        "presence_penalty": 0,
+        "thinking_budget": null,
+        "response_format": {
+          "type": "json_object"
+        }
+      }
+    },
+    "novel-world-context-trimmer": {
+      "description": "世界上下文裁剪器 — 根据本章大纲判断世界设定 JSON 中哪些二级字段对本章不必要，输出减法列表",
+      "prompt_template": "novel-world-context-trimmer",
+      "tools": null,
+      "disallowed_tools": null,
+      "model": "deepseek:deepseek-v4-flash",
+      "max_turns": 15,
+      "system_prompt_template": "",
+      "copy_main_workspace": false,
+      "available_for_sub_session": true,
+      "visible_skill_group_ids": [],
+      "visible_rule_group_ids": [],
+      "model_params": {
+        "thinking_enabled": false,
+        "reasoning_effort": "high",
+        "temperature": 0.3,
+        "top_p": 1,
+        "presence_penalty": 0,
+        "thinking_budget": null,
+        "response_format": {
+          "type": "json_object"
+        }
+      }
+    },
+    "novel-arbiter": {
+      "description": "后验裁决器 — 读Observer差异报告，裁决世界事实(adopt/pending/conflict)、确认故事差异、归类未提事件(hook/debt/discard)，产出JSON裁决结果",
+      "prompt_template": "novel-arbiter",
+      "tools": null,
+      "disallowed_tools": null,
+      "model": "deepseek:deepseek-v4-flash",
+      "max_turns": 60,
+      "system_prompt_template": "",
+      "copy_main_workspace": false,
+      "available_for_sub_session": true,
+      "visible_skill_group_ids": [],
+      "visible_rule_group_ids": [],
+      "model_params": {
+        "thinking_enabled": true,
+        "reasoning_effort": "high",
+        "temperature": 0.3,
+        "top_p": 1,
+        "presence_penalty": 0,
+        "thinking_budget": null,
+        "response_format": {
+          "type": "json_object"
+        }
+      }
+    }
+  }
+}

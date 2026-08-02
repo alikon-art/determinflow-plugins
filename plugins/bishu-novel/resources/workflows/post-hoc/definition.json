@@ -1,0 +1,338 @@
+{
+  "workflow_id": "post-hoc",
+  "name": "章节后验管线",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "script_sync_down",
+      "label": "DB 同步下拉",
+      "node_type": "script",
+      "agent_type": "default",
+      "system_prompt_template": "",
+      "first_message": "",
+      "position": {
+        "x": 100,
+        "y": 150
+      },
+      "var_bindings": {},
+      "node_params": {
+        "script_source": "library",
+        "script_type": "python",
+        "script_name": "db_sync",
+        "script_args": "--book-id {{book_id}} --chapter {{chapter_number}} --templates polish_body",
+        "timeout": 30,
+        "script_group": "nvl"
+      },
+      "auto_flow": false,
+      "enable_complete_node_task": true,
+      "output_variable": "",
+      "enable_reject_upstream": false,
+      "max_reject_count": 3,
+      "save_output_to_file": false,
+      "output_file_path": "",
+      "sub_workflow_params": {}
+    },
+    {
+      "id": "agent_obs",
+      "label": "章节观察员",
+      "node_type": "agent",
+      "agent_type": "novel-chapter-observer",
+      "system_prompt_template": "",
+      "first_message": "运行章节观察。本章：{{chapter_number}}。直接输出纯 JSON，引擎自动保存。\n\n==== 章节正文 ====\n{{chapter_file}}\n\n==== 世界状态 ====\n{{world_state_file}}\n\n==== 世界事件 ====\n{{world_events_file}}\n\n==== 单章指导 ====\n{{guide_file}}\n\n==== 伏笔列表 ====\n{{hooks_file}}\n\n==== 叙事债务 ====\n{{debts_file}}\n\n==== 长线角色状态 ====\n{{character_state_long_file}}\n\n==== 次要角色库 ====\n{{character_minor_file}}\n\n==== 世界观基础 ====\n{{world_foundation_file}}\n\n输出语言：{{language}}。",
+      "position": {
+        "x": 230,
+        "y": 270
+      },
+      "var_bindings": {},
+      "node_params": {},
+      "auto_flow": false,
+      "enable_complete_node_task": true,
+      "output_variable": "",
+      "enable_reject_upstream": false,
+      "max_reject_count": 3,
+      "save_output_to_file": true,
+      "output_file_path": "cache/observer/obs_output.json",
+      "sub_workflow_params": {}
+    },
+    {
+      "id": "agent_arb",
+      "label": "后验裁决器",
+      "node_type": "agent",
+      "agent_type": "novel-arbiter",
+      "system_prompt_template": "",
+      "first_message": "运行后验裁决。本章：{{chapter_number}}。直接输出纯 JSON，引擎自动保存。\n\n==== Observer 差异报告 ====\n{{obs_output_file}}\n\n==== 现有伏笔 ====\n{{hooks_file}}\n\n==== 现有叙事债务 ====\n{{debts_file}}\n\n==== 世界观基础 ====\n{{world_foundation_file}}\n\n输出语言：{{language}}。",
+      "position": {
+        "x": 450,
+        "y": 130
+      },
+      "var_bindings": {},
+      "node_params": {},
+      "auto_flow": false,
+      "enable_complete_node_task": true,
+      "output_variable": "",
+      "enable_reject_upstream": false,
+      "max_reject_count": 3,
+      "save_output_to_file": true,
+      "output_file_path": "cache/arbiter/arb_output.json",
+      "sub_workflow_params": {}
+    },
+    {
+      "id": "script_sync_up",
+      "label": "落库·后验",
+      "node_type": "script",
+      "agent_type": "default",
+      "system_prompt_template": "",
+      "first_message": "",
+      "position": {
+        "x": 550,
+        "y": 290
+      },
+      "var_bindings": {},
+      "node_params": {
+        "script_source": "library",
+        "script_type": "python",
+        "script_name": "db_sync",
+        "script_args": "--book-id {{book_id}} --chapter {{chapter_number}} --direction up --partial ph --workflow-id {{_system.workflow_id}} --workflow-task-id {{_system.task_id}}",
+        "timeout": 30,
+        "script_group": "nvl"
+      },
+      "auto_flow": false,
+      "enable_complete_node_task": true,
+      "output_variable": "",
+      "enable_reject_upstream": false,
+      "max_reject_count": 3,
+      "save_output_to_file": false,
+      "output_file_path": "",
+      "sub_workflow_params": {}
+    },
+    {
+      "id": "script_sync_down_final",
+      "label": "渲染 → 下章文件",
+      "node_type": "script",
+      "agent_type": "default",
+      "system_prompt_template": "",
+      "first_message": "",
+      "position": {
+        "x": 900,
+        "y": 150
+      },
+      "var_bindings": {},
+      "node_params": {
+        "script_source": "library",
+        "script_type": "python",
+        "script_name": "db_sync",
+        "script_args": "--book-id {{book_id}} --chapter {{chapter_number}} --templates hooks,debts,cur_diff_world,cur_diff_story,cur_diff_char",
+        "timeout": 30,
+        "script_group": "nvl"
+      },
+      "auto_flow": false,
+      "enable_complete_node_task": true,
+      "output_variable": "",
+      "enable_reject_upstream": false,
+      "max_reject_count": 3,
+      "save_output_to_file": false,
+      "output_file_path": "",
+      "sub_workflow_params": {}
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge-start-sync_down",
+      "source": "__start__",
+      "target": "script_sync_down"
+    },
+    {
+      "id": "edge-sync_down-obs",
+      "source": "script_sync_down",
+      "target": "agent_obs"
+    },
+    {
+      "id": "edge-obs-arb",
+      "source": "agent_obs",
+      "target": "agent_arb"
+    },
+    {
+      "id": "edge-arb-sync_up",
+      "source": "agent_arb",
+      "target": "script_sync_up"
+    },
+    {
+      "id": "edge-sync_up-sync_down_final",
+      "source": "script_sync_up",
+      "target": "script_sync_down_final"
+    },
+    {
+      "id": "edge-sync_down_final-end",
+      "source": "script_sync_down_final",
+      "target": "__end__"
+    }
+  ],
+  "variables": [
+    {
+      "key": "book_id",
+      "name": "书 ID",
+      "type": "text",
+      "default": "b6f94cfa-15d7-4524-aa0b-2ab2c0cbf646",
+      "required": true,
+      "description": "",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": false
+    },
+    {
+      "key": "chapter_number",
+      "name": "章节号",
+      "type": "text",
+      "default": "0001",
+      "required": true,
+      "description": "",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": false
+    },
+    {
+      "key": "chapter_file",
+      "name": "章节正文",
+      "type": "file",
+      "default": "story/{{chapter_number}}/chapter.md",
+      "required": false,
+      "description": "",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": true
+    },
+    {
+      "key": "world_state_file",
+      "name": "世界状态",
+      "type": "file",
+      "default": "story/{{chapter_number}}/world_state.md",
+      "required": false,
+      "description": "",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": true
+    },
+    {
+      "key": "world_events_file",
+      "name": "世界事件",
+      "type": "file",
+      "default": "story/{{chapter_number}}/world_events.md",
+      "required": false,
+      "description": "",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": true
+    },
+    {
+      "key": "guide_file",
+      "name": "单章指导",
+      "type": "file",
+      "default": "story/{{chapter_number}}/single_chapter_guide.md",
+      "required": false,
+      "description": "",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": true
+    },
+    {
+      "key": "hooks_file",
+      "name": "伏笔列表",
+      "type": "file",
+      "default": "meta/hooks.md",
+      "required": false,
+      "description": "",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": true
+    },
+    {
+      "key": "debts_file",
+      "name": "叙事债务",
+      "type": "file",
+      "default": "meta/debts.md",
+      "required": false,
+      "description": "",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": true
+    },
+    {
+      "key": "character_state_long_file",
+      "name": "长线角色状态",
+      "type": "file",
+      "default": "story/{{chapter_number}}/character_state_long.md",
+      "required": false,
+      "description": "",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": true
+    },
+    {
+      "key": "character_minor_file",
+      "name": "次要角色库",
+      "type": "file",
+      "default": "story/{{chapter_number}}/character_minor.md",
+      "required": false,
+      "description": "",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": true
+    },
+    {
+      "key": "world_foundation_file",
+      "name": "世界观基础",
+      "type": "file",
+      "default": "meta/world_foundation.md",
+      "required": false,
+      "description": "",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": true
+    },
+    {
+      "key": "obs_output_file",
+      "name": "Observer 产出",
+      "type": "file",
+      "default": "cache/observer/obs_output.json",
+      "required": false,
+      "description": "",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": true
+    },
+    {
+      "key": "language",
+      "name": "输出语言",
+      "type": "text",
+      "default": "中文",
+      "required": true,
+      "description": "",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": false
+    }
+  ],
+  "gateways": [],
+  "execution_schemes": [],
+  "start_position": {
+    "x": 300,
+    "y": 50
+  },
+  "end_position": {
+    "x": 300,
+    "y": 550
+  }
+}

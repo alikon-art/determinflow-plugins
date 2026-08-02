@@ -1,0 +1,413 @@
+{
+  "workflow_id": "outline",
+  "name": "卷纲+近纲规划管线",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "script_sync_down",
+      "label": "DB 同步下拉",
+      "node_type": "script",
+      "agent_type": "default",
+      "system_prompt_template": "",
+      "first_message": "",
+      "position": {
+        "x": 100,
+        "y": 60
+      },
+      "var_bindings": {},
+      "node_params": {
+        "script_source": "library",
+        "script_type": "python",
+        "script_name": "db_sync",
+        "script_args": "--book-id {{book_id}} --templates world,character,story_plan,volume,near_term",
+        "timeout": "30",
+        "script_group": "nvl"
+      },
+      "auto_flow": false,
+      "enable_complete_node_task": true,
+      "output_variable": "",
+      "enable_reject_upstream": false,
+      "max_reject_count": 3,
+      "save_output_to_file": false,
+      "output_file_path": "",
+      "sub_workflow_params": {},
+      "fail_auto_skip": false
+    },
+    {
+      "id": "agent_vo",
+      "label": "卷大纲",
+      "node_type": "agent",
+      "agent_type": "novel-volume-outliner",
+      "system_prompt_template": "",
+      "first_message": "运行卷大纲规划。目标卷号：{{volume_number}}。\n读取已有卷大纲（如有），对比目标卷号与已有最大卷号判断行为：\n- 目标卷号 > 最大已有卷号 → 创建新卷\n- 目标卷号 ≤ 最大已有卷号 → 重写该卷，以已有卷纲为参考，输出覆盖旧内容\n直接输出纯 JSON，引擎自动保存。\n\n==== 世界观基础 ====\n{{world_foundation_file}}\n\n==== 故事引擎 ====\n{{story_plan_file}}\n\n==== 角色档案 ====\n{{character_profiles_file}}\\n\\n==== 本书规模 ====\\n预计篇幅：{{estimated_length}}\\n每章字数：{{words_per_chapter}}\n\n==== 已有卷大纲 ====\n{{volume_outline_file}}",
+      "position": {
+        "x": 450,
+        "y": 140
+      },
+      "var_bindings": {},
+      "node_params": {},
+      "auto_flow": true,
+      "enable_complete_node_task": false,
+      "output_variable": "",
+      "enable_reject_upstream": false,
+      "max_reject_count": 3,
+      "save_output_to_file": true,
+      "output_file_path": "cache/vo/vo_output.json",
+      "sub_workflow_params": {},
+      "fail_auto_skip": false
+    },
+    {
+      "id": "script_vo_post",
+      "label": "VO 渲染 MD",
+      "node_type": "script",
+      "agent_type": "default",
+      "system_prompt_template": "",
+      "first_message": "",
+      "position": {
+        "x": 500,
+        "y": 280
+      },
+      "var_bindings": {},
+      "node_params": {
+        "script_source": "library",
+        "script_type": "python",
+        "script_name": "vo_post",
+        "script_args": "--input cache/vo/vo_output.json --volume-number {{volume_number}}",
+        "timeout": "30",
+        "script_group": "nvl"
+      },
+      "auto_flow": false,
+      "enable_complete_node_task": true,
+      "output_variable": "",
+      "enable_reject_upstream": false,
+      "max_reject_count": 3,
+      "save_output_to_file": false,
+      "output_file_path": "",
+      "sub_workflow_params": {},
+      "fail_auto_skip": false
+    },
+    {
+      "id": "script_sync_up_vo",
+      "label": "落库 VO",
+      "node_type": "script",
+      "agent_type": "default",
+      "system_prompt_template": "",
+      "first_message": "",
+      "position": {
+        "x": 260,
+        "y": 280
+      },
+      "var_bindings": {},
+      "node_params": {
+        "script_source": "library",
+        "script_type": "python",
+        "script_name": "db_sync",
+        "script_args": "--book-id {{book_id}} --direction up --partial vo --workflow-id {{_system.workflow_id}} --workflow-task-id {{_system.task_id}}",
+        "timeout": "30",
+        "script_group": "nvl"
+      },
+      "auto_flow": false,
+      "enable_complete_node_task": true,
+      "output_variable": "",
+      "enable_reject_upstream": false,
+      "max_reject_count": 3,
+      "save_output_to_file": false,
+      "output_file_path": "",
+      "sub_workflow_params": {},
+      "fail_auto_skip": false
+    },
+    {
+      "id": "agent_no",
+      "label": "近期大纲",
+      "node_type": "agent",
+      "agent_type": "novel-outliner",
+      "system_prompt_template": "",
+      "first_message": "运行近期大纲规划。目标卷号：{{volume_number}}。\n读取卷纲确定章节范围，读取已有近纲确定进度。\n- 若目标卷的近纲尚不存在 → is_new_volume=true（覆盖写入）\n- 若目标卷的近纲已存在 → 重写模式：以卷纲为准重新规划，is_new_volume=true（覆盖写入）\n直接输出纯 JSON，引擎自动保存。\\n\\n==== 本书规模 ====\\n预计篇幅：{{estimated_length}}\\n每章字数：{{words_per_chapter}}\n\n==== 最新章节号 ====\n{{latest_chapter}}\n\n==== 最新卷大纲 ====\n{{volume_outline_file}}\n\n==== 已有近期大纲 ====\n{{near_term_outline_file}}\n\n==== 故事引擎 ====\n{{story_plan_file}}\n\n==== 角色档案 ====\n{{character_profiles_file}}\n\n==== 最新世界状态 ====\n{{latest_world_state}}\n\n==== 最新世界事件 ====\n{{latest_world_events}}\n\n==== 最新角色状态 ====\n{{latest_character_state}}",
+      "position": {
+        "x": 60,
+        "y": 350
+      },
+      "var_bindings": {},
+      "node_params": {},
+      "auto_flow": false,
+      "enable_complete_node_task": true,
+      "output_variable": "",
+      "enable_reject_upstream": false,
+      "max_reject_count": 3,
+      "save_output_to_file": true,
+      "output_file_path": "cache/no/no_output.json",
+      "sub_workflow_params": {},
+      "fail_auto_skip": false
+    },
+    {
+      "id": "script_no_post",
+      "label": "NO 渲染 MD",
+      "node_type": "script",
+      "agent_type": "default",
+      "system_prompt_template": "",
+      "first_message": "",
+      "position": {
+        "x": 460,
+        "y": 430
+      },
+      "var_bindings": {},
+      "node_params": {
+        "script_source": "library",
+        "script_type": "python",
+        "script_name": "no_post",
+        "script_args": "--input cache/no/no_output.json --volume-number {{volume_number}}",
+        "timeout": "30",
+        "script_group": "nvl"
+      },
+      "auto_flow": false,
+      "enable_complete_node_task": true,
+      "output_variable": "",
+      "enable_reject_upstream": false,
+      "max_reject_count": 3,
+      "save_output_to_file": false,
+      "output_file_path": "",
+      "sub_workflow_params": {},
+      "fail_auto_skip": false
+    },
+    {
+      "id": "script_sync_up_no",
+      "label": "落库 NO",
+      "node_type": "script",
+      "agent_type": "default",
+      "system_prompt_template": "",
+      "first_message": "",
+      "position": {
+        "x": 380,
+        "y": 500
+      },
+      "var_bindings": {},
+      "node_params": {
+        "script_source": "library",
+        "script_type": "python",
+        "script_name": "db_sync",
+        "script_args": "--book-id {{book_id}} --direction up --partial no --workflow-id {{_system.workflow_id}} --workflow-task-id {{_system.task_id}}",
+        "timeout": "30",
+        "script_group": "nvl"
+      },
+      "auto_flow": false,
+      "enable_complete_node_task": true,
+      "output_variable": "",
+      "enable_reject_upstream": false,
+      "max_reject_count": 3,
+      "save_output_to_file": false,
+      "output_file_path": "",
+      "sub_workflow_params": {},
+      "fail_auto_skip": false
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge-start-sync",
+      "source": "__start__",
+      "target": "script_sync_down"
+    },
+    {
+      "id": "edge-sync-vo",
+      "source": "script_sync_down",
+      "target": "agent_vo"
+    },
+    {
+      "id": "edge-vo-vopost",
+      "source": "agent_vo",
+      "target": "script_vo_post"
+    },
+    {
+      "id": "edge-vopost-syncup",
+      "source": "script_vo_post",
+      "target": "script_sync_up_vo"
+    },
+    {
+      "id": "edge-syncup-no",
+      "source": "script_sync_up_vo",
+      "target": "agent_no"
+    },
+    {
+      "id": "edge-no-nopost",
+      "source": "agent_no",
+      "target": "script_no_post"
+    },
+    {
+      "id": "edge-nopost-syncup",
+      "source": "script_no_post",
+      "target": "script_sync_up_no"
+    },
+    {
+      "id": "edge-syncup-end",
+      "source": "script_sync_up_no",
+      "target": "__end__"
+    }
+  ],
+  "variables": [
+    {
+      "key": "volume_number",
+      "name": "目标卷号",
+      "type": "text",
+      "default": "1",
+      "required": true,
+      "description": "目标卷号。引擎自动填充：不传则取已有最大卷号+1（新卷），传数字则重写对应卷",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": false
+    },
+    {
+      "key": "estimated_length",
+      "name": "预计篇幅",
+      "type": "text",
+      "default": "中",
+      "required": true,
+      "description": "全书预计篇幅：短/中/长。影响卷数和每卷章数",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": false
+    },
+    {
+      "key": "words_per_chapter",
+      "name": "每章字数",
+      "type": "text",
+      "default": "2000-2500",
+      "required": true,
+      "description": "每章预计字数范围。影响每章能承载的情节密度",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": false
+    },
+    {
+      "key": "latest_chapter",
+      "name": "最新章节号",
+      "type": "text",
+      "default": "0000",
+      "required": true,
+      "description": "当前已完成的最后一章。引擎自动从 DB 查询填充",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": false
+    },
+    {
+      "key": "near_term_outline_file",
+      "name": "已有近期大纲",
+      "type": "file",
+      "default": "outline/near_term_outline.md",
+      "required": false,
+      "description": "",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": true
+    },
+    {
+      "key": "latest_world_state",
+      "name": "最新世界状态",
+      "type": "file",
+      "default": "story/{{latest_chapter}}/world_state.md",
+      "required": false,
+      "description": "",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": true
+    },
+    {
+      "key": "latest_world_events",
+      "name": "最新世界事件",
+      "type": "file",
+      "default": "story/{{latest_chapter}}/world_events.md",
+      "required": false,
+      "description": "",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": true
+    },
+    {
+      "key": "latest_character_state",
+      "name": "最新角色状态",
+      "type": "file",
+      "default": "story/{{latest_chapter}}/character_state_long.md",
+      "required": false,
+      "description": "",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": true
+    },
+    {
+      "key": "book_id",
+      "name": "书 UUID",
+      "type": "text",
+      "default": "",
+      "required": true,
+      "description": "",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": false
+    },
+    {
+      "key": "world_foundation_file",
+      "name": "世界观基础",
+      "type": "file",
+      "default": "meta/world_foundation.md",
+      "required": false,
+      "description": "",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": true
+    },
+    {
+      "key": "story_plan_file",
+      "name": "故事引擎",
+      "type": "file",
+      "default": "meta/story_plan.md",
+      "required": false,
+      "description": "",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": true
+    },
+    {
+      "key": "character_profiles_file",
+      "name": "角色档案",
+      "type": "file",
+      "default": "meta/character_profiles.md",
+      "required": false,
+      "description": "",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": true
+    },
+    {
+      "key": "volume_outline_file",
+      "name": "已有卷大纲",
+      "type": "file",
+      "default": "outline/volume_outline.md",
+      "required": false,
+      "description": "",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": true
+    }
+  ],
+  "gateways": [],
+  "execution_schemes": [],
+  "start_position": {
+    "x": 370,
+    "y": -70
+  },
+  "end_position": {
+    "x": 300,
+    "y": 550
+  }
+}

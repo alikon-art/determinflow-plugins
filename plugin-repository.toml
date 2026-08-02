@@ -1,0 +1,6 @@
+schema_version = "1"
+name = "DeterminFlow Official Plugins"
+
+[[plugins]]
+id = "bishu-novel"
+subdirectory = "plugins/bishu-novel"

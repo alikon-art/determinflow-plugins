@@ -1,0 +1,613 @@
+{
+  "workflow_id": "character",
+  "name": "角色创建管线",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "script_sync_down",
+      "label": "DB同步→文件",
+      "node_type": "script",
+      "agent_type": "default",
+      "system_prompt_template": "",
+      "first_message": "",
+      "position": {
+        "x": 490,
+        "y": 50
+      },
+      "var_bindings": {},
+      "node_params": {
+        "script_source": "library",
+        "script_type": "python",
+        "script_name": "db_sync",
+        "script_args": "--book-id '{{book_id}}' --templates world",
+        "timeout": "30",
+        "script_group": "nvl"
+      },
+      "auto_flow": false,
+      "enable_complete_node_task": true,
+      "output_variable": "",
+      "enable_reject_upstream": false,
+      "max_reject_count": 3,
+      "save_output_to_file": false,
+      "output_file_path": "",
+      "sub_workflow_params": {},
+      "fail_auto_skip": false
+    },
+    {
+      "id": "agent_skeleton",
+      "label": "角色阵容骨架",
+      "node_type": "agent",
+      "agent_type": "novel-character-skeleton",
+      "system_prompt_template": "",
+      "first_message": "【题材创意】\n{{premise}}\n\n【题材类型】\n{{genre}}\n\n【世界观】\n{{world_foundation}}\n\n请生成全体角色的骨架设定。\n\n输出语言：{{language}}。你的所有产出内容——包括文件内容、JSON 字段值、分析报告——都必须使用 {{language}}。",
+      "position": {
+        "x": 440,
+        "y": 160
+      },
+      "var_bindings": {},
+      "node_params": {},
+      "auto_flow": false,
+      "enable_complete_node_task": true,
+      "output_variable": "skeleton_output",
+      "enable_reject_upstream": false,
+      "max_reject_count": 3,
+      "save_output_to_file": true,
+      "output_file_path": "cache/character/skeleton.json",
+      "sub_workflow_params": {},
+      "fail_auto_skip": false
+    },
+    {
+      "id": "script_persist_skeleton",
+      "label": "写入DB：角色骨架",
+      "node_type": "script",
+      "agent_type": "default",
+      "system_prompt_template": "",
+      "first_message": "",
+      "position": {
+        "x": 740,
+        "y": 170
+      },
+      "var_bindings": {},
+      "node_params": {
+        "script_source": "library",
+        "script_type": "python",
+        "script_group": "nvl",
+        "script_name": "json_to_db",
+        "script_args": "--book-id {{book_id}} --action upsert-character-skeleton --skeleton cache/character/skeleton.json --workflow-id {{_system.workflow_id}} --workflow-task-id {{_system.task_id}}",
+        "timeout": "30"
+      },
+      "auto_flow": false,
+      "enable_complete_node_task": true,
+      "output_variable": "",
+      "enable_reject_upstream": false,
+      "max_reject_count": 3,
+      "save_output_to_file": false,
+      "output_file_path": "",
+      "sub_workflow_params": {},
+      "fail_auto_skip": false
+    },
+    {
+      "id": "script_extract",
+      "label": "提取角色名",
+      "node_type": "script",
+      "agent_type": "default",
+      "system_prompt_template": "",
+      "first_message": "",
+      "position": {
+        "x": 190,
+        "y": 180
+      },
+      "var_bindings": {},
+      "node_params": {
+        "script_source": "inline",
+        "script_type": "python",
+        "script_name": "extract_names",
+        "script_args": "--file cache/character/skeleton.json",
+        "timeout": "30"
+      },
+      "auto_flow": false,
+      "enable_complete_node_task": true,
+      "output_variable": "",
+      "enable_reject_upstream": false,
+      "max_reject_count": 3,
+      "save_output_to_file": false,
+      "output_file_path": "",
+      "sub_workflow_params": {},
+      "fail_auto_skip": false
+    },
+    {
+      "id": "agent_belief",
+      "label": "角色信念生态",
+      "node_type": "agent",
+      "agent_type": "novel-character-belief",
+      "system_prompt_template": "",
+      "first_message": "【题材创意】\n{{premise}}\n\n【题材类型】\n{{genre}}\n\n【角色骨架】\n{{skeleton_json}}\n\n🔴 请严格根据【角色骨架】中 characters 数组列出的角色，逐一生成核心信念。\n不得添加骨架中不存在的角色，不得自行发明角色名。\n骨架有几个角色，你的输出就必须恰好包含几个。\n\n输出语言：{{language}}。你的所有产出内容——包括文件内容、JSON 字段值、分析报告——都必须使用 {{language}}。",
+      "position": {
+        "x": 200,
+        "y": 300
+      },
+      "var_bindings": {},
+      "node_params": {},
+      "auto_flow": false,
+      "enable_complete_node_task": true,
+      "output_variable": "beliefs_output",
+      "enable_reject_upstream": false,
+      "max_reject_count": 3,
+      "save_output_to_file": true,
+      "output_file_path": "cache/character/beliefs.json",
+      "sub_workflow_params": {},
+      "fail_auto_skip": false
+    },
+    {
+      "id": "script_persist_belief",
+      "label": "写入DB：信念生态",
+      "node_type": "script",
+      "agent_type": "default",
+      "system_prompt_template": "",
+      "first_message": "",
+      "position": {
+        "x": 480,
+        "y": 310
+      },
+      "var_bindings": {},
+      "node_params": {
+        "script_source": "library",
+        "script_type": "python",
+        "script_group": "nvl",
+        "script_name": "json_to_db",
+        "script_args": "--book-id {{book_id}} --action upsert-character-beliefs --beliefs cache/character/beliefs.json --workflow-id {{_system.workflow_id}} --workflow-task-id {{_system.task_id}}",
+        "timeout": "30"
+      },
+      "auto_flow": false,
+      "enable_complete_node_task": true,
+      "output_variable": "",
+      "enable_reject_upstream": false,
+      "max_reject_count": 3,
+      "save_output_to_file": false,
+      "output_file_path": "",
+      "sub_workflow_params": {},
+      "fail_auto_skip": false
+    },
+    {
+      "id": "agent_deep",
+      "label": "角色深层维度",
+      "node_type": "agent",
+      "agent_type": "novel-character-deep",
+      "system_prompt_template": "",
+      "first_message": "【题材创意】\n{{premise}}\n\n【题材类型】\n{{genre}}\n\n【角色骨架】\n{{skeleton_json}}\n\n【信念系统】\n{{beliefs_json}}\n\n【当前角色】\n{{name}}\n\n请生成该角色的深层维度设定（B/C/D 层）。\n\n输出语言：{{language}}。你的所有产出内容——包括文件内容、JSON 字段值、分析报告——都必须使用 {{language}}。",
+      "position": {
+        "x": 730,
+        "y": 320
+      },
+      "var_bindings": {},
+      "node_params": {},
+      "auto_flow": false,
+      "enable_complete_node_task": true,
+      "output_variable": "deep_output",
+      "enable_reject_upstream": false,
+      "max_reject_count": 3,
+      "save_output_to_file": true,
+      "output_file_path": "cache/character/{{name}}_deep.json",
+      "sub_workflow_params": {},
+      "fail_auto_skip": false
+    },
+    {
+      "id": "script_persist_deep",
+      "label": "写入DB：深层维度",
+      "node_type": "script",
+      "agent_type": "default",
+      "system_prompt_template": "",
+      "first_message": "",
+      "position": {
+        "x": 930,
+        "y": 350
+      },
+      "var_bindings": {},
+      "node_params": {
+        "script_source": "library",
+        "script_type": "python",
+        "script_group": "nvl",
+        "script_name": "json_to_db",
+        "script_args": "--book-id {{book_id}} --action upsert-character-deep --deep-file cache/character/{{name}}_deep.json --character-name {{name}} --workflow-id {{_system.workflow_id}} --workflow-task-id {{_system.task_id}}",
+        "timeout": "30"
+      },
+      "auto_flow": false,
+      "enable_complete_node_task": true,
+      "output_variable": "",
+      "enable_reject_upstream": false,
+      "max_reject_count": 3,
+      "save_output_to_file": false,
+      "output_file_path": "",
+      "sub_workflow_params": {},
+      "fail_auto_skip": false
+    },
+    {
+      "id": "script_sleep",
+      "label": "等待SSE推送",
+      "node_type": "script",
+      "agent_type": "default",
+      "system_prompt_template": "",
+      "first_message": "",
+      "position": {
+        "x": 1050,
+        "y": 380
+      },
+      "var_bindings": {},
+      "node_params": {
+        "script_source": "inline",
+        "script_type": "python",
+        "script_name": "sleep_2s",
+        "script_args": "",
+        "timeout": "10"
+      },
+      "auto_flow": false,
+      "enable_complete_node_task": true,
+      "output_variable": "",
+      "enable_reject_upstream": false,
+      "max_reject_count": 3,
+      "save_output_to_file": false,
+      "output_file_path": "",
+      "sub_workflow_params": {},
+      "fail_auto_skip": false
+    },
+    {
+      "id": "script_merge",
+      "label": "拼接角色文档",
+      "node_type": "script",
+      "agent_type": "default",
+      "system_prompt_template": "",
+      "first_message": "",
+      "position": {
+        "x": 190,
+        "y": 420
+      },
+      "var_bindings": {},
+      "node_params": {
+        "script_source": "library",
+        "script_type": "python",
+        "script_name": "json_to_md",
+        "script_args": "--mode character --book-dir '.' --output 'meta/character_profiles.md' --title '角色档案'",
+        "timeout": "30",
+        "script_group": "nvl"
+      },
+      "auto_flow": false,
+      "enable_complete_node_task": true,
+      "output_variable": "",
+      "enable_reject_upstream": false,
+      "max_reject_count": 3,
+      "save_output_to_file": false,
+      "output_file_path": "",
+      "sub_workflow_params": {},
+      "fail_auto_skip": false
+    },
+    {
+      "id": "agent_voice",
+      "label": "角色声线提取",
+      "node_type": "agent",
+      "agent_type": "novel-character-voice",
+      "system_prompt_template": "",
+      "first_message": "【角色档案】\n{{character_profiles_file}}\n\n请基于以上角色档案，为每个核心角色生成声线条目。\n\n每个角色包含：\n1. **核心声音定位** — 这个角色\"听起来像谁\"（一句话概括其语言气质）\n2. **句法指纹** — 长短句偏好、口头禅或惯用词组、停顿习惯、常用句式结构\n3. **认知偏差** — 他看世界时的滤镜是什么（偏乐观/偏怀疑/偏自保/偏冲动/偏计算...），这决定同一件事不同角色会怎么解读\n\n核心原则：\n- 所有信息必须能从角色档案的\"核心欲望\"\"深层恐惧\"\"秘密\"\"核心信念\"\"说话方式\"等字段中推导\n- 不得凭空编造角色档案中没有的特征\n- 如果某个角色的某维度信息不足，标注「待补充」而非猜测\n\n输出语言：{{language}}。你的所有产出内容——包括文件内容、JSON 字段值、分析报告——都必须使用 {{language}}。",
+      "position": {
+        "x": 0,
+        "y": 540
+      },
+      "var_bindings": {},
+      "node_params": {},
+      "auto_flow": false,
+      "enable_complete_node_task": true,
+      "output_variable": "voice_output",
+      "enable_reject_upstream": false,
+      "max_reject_count": 3,
+      "save_output_to_file": true,
+      "output_file_path": "cache/character/voice.json",
+      "sub_workflow_params": {},
+      "fail_auto_skip": false
+    },
+    {
+      "id": "script_persist_voice",
+      "label": "写入DB：角色声线",
+      "node_type": "script",
+      "agent_type": "default",
+      "system_prompt_template": "",
+      "first_message": "",
+      "position": {
+        "x": 380,
+        "y": 570
+      },
+      "var_bindings": {},
+      "node_params": {
+        "script_source": "library",
+        "script_type": "python",
+        "script_group": "nvl",
+        "script_name": "json_to_db",
+        "script_args": "--book-id {{book_id}} --action upsert-character-voice --voice cache/character/voice.json --workflow-id {{_system.workflow_id}} --workflow-task-id {{_system.task_id}}",
+        "timeout": "30"
+      },
+      "auto_flow": false,
+      "enable_complete_node_task": true,
+      "output_variable": "",
+      "enable_reject_upstream": false,
+      "max_reject_count": 3,
+      "save_output_to_file": false,
+      "output_file_path": "",
+      "sub_workflow_params": {},
+      "fail_auto_skip": false
+    },
+    {
+      "id": "script_voice_to_md",
+      "label": "渲染 → character_voice.md",
+      "node_type": "script",
+      "agent_type": "default",
+      "system_prompt_template": "",
+      "first_message": "",
+      "position": {
+        "x": 150,
+        "y": 670
+      },
+      "var_bindings": {},
+      "node_params": {
+        "script_source": "library",
+        "script_type": "python",
+        "script_name": "json_to_md",
+        "script_args": "--mode voice --voice-json 'cache/character/voice.json' --output 'meta/character_voice.md' --title '角色声音锚'",
+        "timeout": "30",
+        "script_group": "nvl"
+      },
+      "auto_flow": false,
+      "enable_complete_node_task": true,
+      "output_variable": "",
+      "enable_reject_upstream": false,
+      "max_reject_count": 3,
+      "save_output_to_file": false,
+      "output_file_path": "",
+      "sub_workflow_params": {},
+      "fail_auto_skip": false
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge-start-sync",
+      "source": "__start__",
+      "target": "script_sync_down"
+    },
+    {
+      "id": "edge-sync-skeleton",
+      "source": "script_sync_down",
+      "target": "agent_skeleton"
+    },
+    {
+      "id": "edge-skeleton-persist",
+      "source": "agent_skeleton",
+      "target": "script_persist_skeleton"
+    },
+    {
+      "id": "edge-persist-skel-extract",
+      "source": "script_persist_skeleton",
+      "target": "script_extract"
+    },
+    {
+      "id": "edge-extract-belief",
+      "source": "script_extract",
+      "target": "agent_belief"
+    },
+    {
+      "id": "edge-belief-persist",
+      "source": "agent_belief",
+      "target": "script_persist_belief"
+    },
+    {
+      "id": "edge-persist-belief-loop",
+      "source": "script_persist_belief",
+      "target": "gw_loop"
+    },
+    {
+      "id": "edge-loop-deep",
+      "source": "gw_loop",
+      "target": "agent_deep",
+      "condition": {
+        "expression": "for name in character_names",
+        "label": "循环体",
+        "is_default": false
+      }
+    },
+    {
+      "id": "edge-deep-persist",
+      "source": "agent_deep",
+      "target": "script_persist_deep"
+    },
+    {
+      "id": "edge-persist-deep-sleep",
+      "source": "script_persist_deep",
+      "target": "script_sleep"
+    },
+    {
+      "id": "edge-sleep-loop",
+      "source": "script_sleep",
+      "target": "gw_loop"
+    },
+    {
+      "id": "edge-loop-merge",
+      "source": "gw_loop",
+      "target": "script_merge",
+      "condition": {
+        "label": "退出",
+        "is_default": true
+      }
+    },
+    {
+      "id": "edge-merge-voice",
+      "source": "script_merge",
+      "target": "agent_voice"
+    },
+    {
+      "id": "edge-voice-persist",
+      "source": "agent_voice",
+      "target": "script_persist_voice"
+    },
+    {
+      "id": "edge-persist-voice-md",
+      "source": "script_persist_voice",
+      "target": "script_voice_to_md"
+    },
+    {
+      "id": "edge-md-end",
+      "source": "script_voice_to_md",
+      "target": "__end__"
+    }
+  ],
+  "variables": [
+    {
+      "key": "book_id",
+      "name": "书籍ID",
+      "type": "text",
+      "default": "",
+      "required": true,
+      "description": "书籍 UUID，建书 API 返回",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": false
+    },
+    {
+      "key": "premise",
+      "name": "题材创意",
+      "type": "textarea",
+      "default": "",
+      "required": true,
+      "description": "用户建书时输入的创意内容，描述故事前提、主角设定、核心概念等",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": false
+    },
+    {
+      "key": "genre",
+      "name": "题材类型",
+      "type": "text",
+      "default": "",
+      "required": true,
+      "description": "如：东方玄幻、都市异能、科幻末世、历史架空、悬疑推理 等",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": false
+    },
+    {
+      "key": "world_foundation",
+      "name": "世界观文件",
+      "type": "file",
+      "default": "meta/world_foundation.md",
+      "required": false,
+      "description": "world_foundation.md 路径（相对 workspace）。建书管线须设置 workspace_override",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": true
+    },
+    {
+      "key": "skeleton_json",
+      "name": "骨架 JSON",
+      "type": "file",
+      "default": "cache/character/skeleton.json",
+      "required": false,
+      "description": "agent_skeleton 产出的角色骨架 JSON 文件",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": true
+    },
+    {
+      "key": "beliefs_json",
+      "name": "信念 JSON",
+      "type": "file",
+      "default": "cache/character/beliefs.json",
+      "required": false,
+      "description": "agent_belief 产出的信念系统 JSON 文件",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": true
+    },
+    {
+      "key": "character_names",
+      "name": "角色名列表",
+      "type": "list",
+      "default": "[]",
+      "required": false,
+      "description": "extract_names 脚本产出的角色名数组，供循环网关遍历",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": true
+    },
+    {
+      "key": "name",
+      "name": "当前角色名",
+      "type": "text",
+      "default": "",
+      "required": false,
+      "description": "逐角色循环当前项，由 Loop Gateway 在每轮设置",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": true
+    },
+    {
+      "key": "deep_json",
+      "name": "深层维度 JSON",
+      "type": "file",
+      "default": "cache/character/{{name}}_deep.json",
+      "required": false,
+      "description": "agent_deep 每轮产出的角色深层维度 JSON 文件",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": true
+    },
+    {
+      "key": "character_profiles_file",
+      "name": "角色档案MD",
+      "type": "file",
+      "default": "meta/character_profiles.md",
+      "required": false,
+      "description": "script_merge 生成的最终角色档案，供声线提取读取",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": true
+    },
+    {
+      "key": "language",
+      "name": "输出语言",
+      "type": "text",
+      "default": "中文",
+      "required": true,
+      "description": "所有 agent 的产出语言。中文 / English",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": false
+    }
+  ],
+  "gateways": [
+    {
+      "id": "gw_loop",
+      "gateway_type": "loop",
+      "label": "逐角色循环",
+      "position": {
+        "x": 620,
+        "y": 450
+      },
+      "converge_gateway_id": null
+    }
+  ],
+  "execution_schemes": [],
+  "start_position": {
+    "x": 300,
+    "y": 50
+  },
+  "end_position": {
+    "x": 300,
+    "y": 550
+  }
+}

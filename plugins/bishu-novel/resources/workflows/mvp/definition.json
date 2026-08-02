@@ -1,0 +1,1706 @@
+{
+  "workflow_id": "mvp",
+  "name": "章节生产管线",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "script_sync_down",
+      "label": "DB 同步下拉",
+      "node_type": "script",
+      "agent_type": "default",
+      "system_prompt_template": "",
+      "first_message": "",
+      "position": {
+        "x": 270,
+        "y": 180
+      },
+      "var_bindings": {},
+      "node_params": {
+        "script_source": "library",
+        "script_type": "python",
+        "script_name": "db_sync",
+        "script_args": "--book-id {{book_id}} --chapter {{chapter_number}} --prev-chapter {{prev_chapter}} --templates world,character,character_json,voice,style,story_plan,hooks,debts,volume,near_term,near_term_we,prev_ws,prev_we,prev_cs,prev_cm,prev_diff_world,prev_diff_story,prev_diff_char,guide,cs,cm",
+        "timeout": "30",
+        "script_group": "nvl"
+      },
+      "auto_flow": false,
+      "enable_complete_node_task": true,
+      "output_variable": "",
+      "enable_reject_upstream": false,
+      "max_reject_count": 3,
+      "save_output_to_file": false,
+      "output_file_path": "",
+      "sub_workflow_params": {},
+      "fail_auto_skip": false
+    },
+    {
+      "id": "agent_we",
+      "label": "世界状态机",
+      "node_type": "agent",
+      "agent_type": "novel-observer",
+      "system_prompt_template": "",
+      "first_message": "运行世界状态机。本章：{{chapter_number}}，上一章：{{prev_chapter}}。直接输出纯 JSON，引擎自动保存。\n\n==== 世界观基础 ====\n{{world_foundation_file}}\n\n==== 世界意图（上帝模式） ====\n{{world_intent}}\n\n\n==== 近纲（世界时间推进） ====\n{{near_term_we_file}}\n\n==== 上一章世界状态 ====\n{{prev_world_state}}\n\n==== 上一章世界事件 ====\n{{prev_world_events}}\n\n==== 上一章后验裁决 ====\n{{prev_diff_world}}",
+      "position": {
+        "x": 160,
+        "y": -80
+      },
+      "var_bindings": {},
+      "node_params": {},
+      "auto_flow": false,
+      "enable_complete_node_task": true,
+      "output_variable": "",
+      "enable_reject_upstream": false,
+      "max_reject_count": 3,
+      "save_output_to_file": true,
+      "output_file_path": "cache/we/we_output.json",
+      "sub_workflow_params": {},
+      "fail_auto_skip": false
+    },
+    {
+      "id": "script_we_post",
+      "label": "WE 后处理",
+      "node_type": "script",
+      "agent_type": "default",
+      "system_prompt_template": "",
+      "first_message": "",
+      "position": {
+        "x": 60,
+        "y": 50
+      },
+      "var_bindings": {},
+      "node_params": {
+        "script_source": "library",
+        "script_type": "python",
+        "script_name": "we_post",
+        "script_args": "--input cache/we/we_output.json",
+        "timeout": 30,
+        "script_group": "nvl"
+      },
+      "auto_flow": false,
+      "enable_complete_node_task": true,
+      "output_variable": "",
+      "enable_reject_upstream": false,
+      "max_reject_count": 3,
+      "save_output_to_file": false,
+      "output_file_path": "",
+      "sub_workflow_params": {},
+      "fail_auto_skip": false
+    },
+    {
+      "id": "sync_up_we",
+      "label": "落库·WE",
+      "node_type": "script",
+      "agent_type": "default",
+      "system_prompt_template": "",
+      "first_message": "",
+      "position": {
+        "x": 10,
+        "y": -250
+      },
+      "var_bindings": {},
+      "node_params": {
+        "script_source": "library",
+        "script_type": "python",
+        "script_name": "db_sync",
+        "script_args": "--book-id {{book_id}} --chapter {{chapter_number}} --direction up --partial we --workflow-id {{_system.workflow_id}} --workflow-task-id {{_system.task_id}}",
+        "timeout": 30,
+        "script_group": "nvl"
+      },
+      "auto_flow": false,
+      "enable_complete_node_task": true,
+      "output_variable": "",
+      "enable_reject_upstream": false,
+      "max_reject_count": 3,
+      "save_output_to_file": false,
+      "output_file_path": "",
+      "sub_workflow_params": {},
+      "fail_auto_skip": false
+    },
+    {
+      "id": "agent_id",
+      "label": "意图分发器",
+      "node_type": "agent",
+      "agent_type": "novel-intent-distributor",
+      "system_prompt_template": "",
+      "first_message": "人类意图如下。将其拆分为 OD 和 SE 两路。输出纯 JSON（不带 markdown 包裹）：\n\n==== 人类意图 ====\n{{human_intent}}\n\nJSON 格式：{\"od_intent\": \"给大纲导演的意图\", \"se_intent\": \"给意图导演的意图\"}。无意图时字段值写（空）。\n\n输出语言：{{language}}。你的所有产出内容——包括文件内容、JSON 字段值、分析报告——都必须使用 {{language}}。",
+      "position": {
+        "x": 280,
+        "y": -230
+      },
+      "var_bindings": {},
+      "node_params": {},
+      "auto_flow": false,
+      "enable_complete_node_task": true,
+      "output_variable": "id_output",
+      "enable_reject_upstream": false,
+      "max_reject_count": 3,
+      "save_output_to_file": true,
+      "output_file_path": "cache/intent.json",
+      "sub_workflow_params": {},
+      "fail_auto_skip": false
+    },
+    {
+      "id": "script_parse_intent",
+      "label": "意图解析",
+      "node_type": "script",
+      "agent_type": "default",
+      "system_prompt_template": "",
+      "first_message": "",
+      "position": {
+        "x": 280,
+        "y": -160
+      },
+      "var_bindings": {},
+      "node_params": {
+        "script_source": "library",
+        "script_type": "python",
+        "script_name": "parse_intent",
+        "script_args": "--input cache/intent.json",
+        "timeout": 30,
+        "script_group": "nvl"
+      },
+      "auto_flow": false,
+      "enable_complete_node_task": true,
+      "output_variable": "",
+      "enable_reject_upstream": false,
+      "max_reject_count": 3,
+      "save_output_to_file": false,
+      "output_file_path": "",
+      "sub_workflow_params": {},
+      "fail_auto_skip": false
+    },
+    {
+      "id": "script_se_post",
+      "label": "SE 后处理·渲染",
+      "node_type": "script",
+      "agent_type": "default",
+      "system_prompt_template": "",
+      "first_message": "",
+      "position": {
+        "x": 1220,
+        "y": 120
+      },
+      "var_bindings": {},
+      "node_params": {
+        "script_source": "library",
+        "script_type": "python",
+        "script_name": "se_post",
+        "script_args": "--input cache/se/se_output.json --output story/{{chapter_number}}/storyboard.md",
+        "timeout": 30,
+        "script_group": "nvl"
+      },
+      "auto_flow": false,
+      "enable_complete_node_task": true,
+      "output_variable": "",
+      "enable_reject_upstream": false,
+      "max_reject_count": 3,
+      "save_output_to_file": false,
+      "output_file_path": "",
+      "sub_workflow_params": {},
+      "fail_auto_skip": false
+    },
+    {
+      "id": "agent_od",
+      "label": "大纲导演",
+      "node_type": "agent",
+      "agent_type": "novel-director",
+      "system_prompt_template": "",
+      "first_message": "运行大纲导演。本章：{{chapter_number}}，上一章：{{prev_chapter}}。目标字数：{{target_word_count}}。直接输出纯 JSON，引擎自动保存。\n\n==== 世界观基础 ====\n{{world_foundation_file}}\n\n==== 故事引擎 ====\n{{story_plan_file}}\n\n==== 风格档案 ====\n{{style_guide_file}}\n\n==== 伏笔列表 ====\n{{hooks_file}}\n\n==== 叙事债务 ====\n{{debts_file}}\n\n==== 角色档案 ====\n{{character_profiles_file}}\n\n==== 长线角色状态 ====\n{{character_state_long_file}}\n\n==== 卷纲 ====\n{{volume_outline_file}}\n\n==== 近纲 ====\n{{near_term_outline_file}}\n\n==== 上一章世界状态 ====\n{{prev_world_state}}\n\n==== 上一章世界事件 ====\n{{prev_world_events}}\n\n==== 上一章后验裁决 ====\n{{diff_story_file}}\n\n==== 人类意图 ====\n{{od_intent}}",
+      "position": {
+        "x": 530,
+        "y": -120
+      },
+      "var_bindings": {},
+      "node_params": {},
+      "auto_flow": false,
+      "enable_complete_node_task": true,
+      "output_variable": "",
+      "enable_reject_upstream": false,
+      "max_reject_count": 3,
+      "save_output_to_file": true,
+      "output_file_path": "cache/od/od_output.json",
+      "sub_workflow_params": {},
+      "fail_auto_skip": false
+    },
+    {
+      "id": "script_od_post",
+      "label": "OD 后处理",
+      "node_type": "script",
+      "agent_type": "default",
+      "system_prompt_template": "",
+      "first_message": "",
+      "position": {
+        "x": 470,
+        "y": 0
+      },
+      "var_bindings": {},
+      "node_params": {
+        "script_source": "library",
+        "script_type": "python",
+        "script_name": "od_post",
+        "script_args": "--input cache/od/od_output.json",
+        "timeout": 30,
+        "script_group": "nvl"
+      },
+      "auto_flow": false,
+      "enable_complete_node_task": true,
+      "output_variable": "",
+      "enable_reject_upstream": false,
+      "max_reject_count": 3,
+      "save_output_to_file": false,
+      "output_file_path": "",
+      "sub_workflow_params": {},
+      "fail_auto_skip": false
+    },
+    {
+      "id": "sync_up_od",
+      "label": "落库·OD",
+      "node_type": "script",
+      "agent_type": "default",
+      "system_prompt_template": "",
+      "first_message": "",
+      "position": {
+        "x": 900,
+        "y": -200
+      },
+      "var_bindings": {},
+      "node_params": {
+        "script_source": "library",
+        "script_type": "python",
+        "script_name": "db_sync",
+        "script_args": "--book-id {{book_id}} --chapter {{chapter_number}} --direction up --partial od --workflow-id {{_system.workflow_id}} --workflow-task-id {{_system.task_id}}",
+        "timeout": 30,
+        "script_group": "nvl"
+      },
+      "auto_flow": false,
+      "enable_complete_node_task": true,
+      "output_variable": "",
+      "enable_reject_upstream": false,
+      "max_reject_count": 3,
+      "save_output_to_file": false,
+      "output_file_path": "",
+      "sub_workflow_params": {},
+      "fail_auto_skip": false
+    },
+    {
+      "id": "agent_cm",
+      "label": "角色状态维护",
+      "node_type": "agent",
+      "agent_type": "novel-character-maintainer",
+      "system_prompt_template": "",
+      "first_message": "运行角色状态维护师。本章：{{chapter_number}}，上一章：{{prev_chapter}}。直接输出纯 JSON，引擎自动保存。\n\n==== 角色档案 ====\n{{character_profiles_file}}\n\n==== 角色声音锚 ====\n{{character_voice_file}}\n\n==== 风格定位 ====\n{{style_guide_file}}\n\n==== 叙事债务 ====\n{{debts_file}}\n\n==== 单章指导 ====\n{{guide_file}}\n\n==== 上一章长线状态 ====\n{{prev_character_state}}\n\n==== 上一章次要角色库 ====\n{{prev_character_minor}}\n\n==== 上章角色差异 ====\n{{prev_diff_character}}",
+      "position": {
+        "x": 840,
+        "y": -70
+      },
+      "var_bindings": {},
+      "node_params": {},
+      "auto_flow": false,
+      "enable_complete_node_task": true,
+      "output_variable": "",
+      "enable_reject_upstream": false,
+      "max_reject_count": 3,
+      "save_output_to_file": true,
+      "output_file_path": "cache/cm/cm_output.json",
+      "sub_workflow_params": {},
+      "fail_auto_skip": false
+    },
+    {
+      "id": "script_cm_post",
+      "label": "CM 后处理",
+      "node_type": "script",
+      "agent_type": "default",
+      "system_prompt_template": "",
+      "first_message": "",
+      "position": {
+        "x": 750,
+        "y": 50
+      },
+      "var_bindings": {},
+      "node_params": {
+        "script_source": "library",
+        "script_type": "python",
+        "script_name": "cm_post",
+        "script_args": "--input cache/cm/cm_output.json",
+        "timeout": 30,
+        "script_group": "nvl"
+      },
+      "auto_flow": false,
+      "enable_complete_node_task": true,
+      "output_variable": "",
+      "enable_reject_upstream": false,
+      "max_reject_count": 3,
+      "save_output_to_file": false,
+      "output_file_path": "",
+      "sub_workflow_params": {},
+      "fail_auto_skip": false
+    },
+    {
+      "id": "sync_up_cm",
+      "label": "落库·CM",
+      "node_type": "script",
+      "agent_type": "default",
+      "system_prompt_template": "",
+      "first_message": "",
+      "position": {
+        "x": 1130,
+        "y": 0
+      },
+      "var_bindings": {},
+      "node_params": {
+        "script_source": "library",
+        "script_type": "python",
+        "script_name": "db_sync",
+        "script_args": "--book-id {{book_id}} --chapter {{chapter_number}} --direction up --partial cm --workflow-id {{_system.workflow_id}} --workflow-task-id {{_system.task_id}}",
+        "timeout": 30,
+        "script_group": "nvl"
+      },
+      "auto_flow": false,
+      "enable_complete_node_task": true,
+      "output_variable": "",
+      "enable_reject_upstream": false,
+      "max_reject_count": 3,
+      "save_output_to_file": false,
+      "output_file_path": "",
+      "sub_workflow_params": {},
+      "fail_auto_skip": false
+    },
+    {
+      "id": "agent_se",
+      "label": "意图导演",
+      "node_type": "agent",
+      "agent_type": "novel-settler",
+      "system_prompt_template": "",
+      "first_message": "运行意图导演。本章：{{chapter_number}}，上一章：{{prev_chapter}}。直接输出纯 JSON，引擎自动保存。\n\n==== 单章指导 ====\n{{guide_file}}\n\n==== 故事引擎 ====\n{{story_plan_file}}\n\n==== 长线角色状态 ====\n{{character_state_long_file}}\n\n==== 近纲 ====\n{{near_term_outline_file}}\n\n==== 风格指南 ====\n{{style_guide_file}}\n\n==== 角色声音锚 ====\n{{character_voice_file}}\n\n==== 角色档案 ====\n{{character_profiles_file}}\n\n==== 伏笔列表 ====\n{{hooks_file}}\n\n==== 本章世界状态 ====\n{{world_state_file}}\n\n==== 上一章分镜 ====\n{{prev_storyboard_file}}\n\n==== 人类意图 ====\n{{se_intent}}\n\n输出语言：{{language}}。",
+      "position": {
+        "x": 940,
+        "y": 130
+      },
+      "var_bindings": {},
+      "node_params": {},
+      "auto_flow": true,
+      "enable_complete_node_task": false,
+      "output_variable": "",
+      "enable_reject_upstream": false,
+      "max_reject_count": 3,
+      "save_output_to_file": true,
+      "output_file_path": "cache/se/se_output.json",
+      "sub_workflow_params": {},
+      "fail_auto_skip": false
+    },
+    {
+      "id": "agent_trimmer",
+      "label": "上下文裁剪器",
+      "node_type": "agent",
+      "agent_type": "novel-world-context-trimmer",
+      "system_prompt_template": "",
+      "first_message": "运行世界裁剪器。本章：{{chapter_number}}。直接输出纯 JSON，引擎自动保存。\n\n==== 世界设定 JSON ====\n{{sync_world_json}}\n\n==== 单章指导 ====\n{{guide_file}}\n\n==== 卷纲 ====\n{{volume_outline_file}}\n\n==== 近纲 ====\n{{near_term_outline_file}}\n\n==== 角色 JSON ====\n{{characters_json_file}}",
+      "position": {
+        "x": 1350,
+        "y": -20
+      },
+      "var_bindings": {},
+      "node_params": {},
+      "auto_flow": false,
+      "enable_complete_node_task": true,
+      "output_variable": "",
+      "enable_reject_upstream": false,
+      "max_reject_count": 3,
+      "save_output_to_file": true,
+      "output_file_path": "cache/trimmer/subtract.json",
+      "sub_workflow_params": {},
+      "fail_auto_skip": false
+    },
+    {
+      "id": "script_trimmer_post",
+      "label": "裁剪后处理",
+      "node_type": "script",
+      "agent_type": "default",
+      "system_prompt_template": "",
+      "first_message": "",
+      "position": {
+        "x": 1660,
+        "y": -20
+      },
+      "var_bindings": {},
+      "node_params": {
+        "script_source": "library",
+        "script_type": "python",
+        "script_name": "trimmer_post",
+        "script_args": "--world-json cache/sync/world.json --subtract cache/trimmer/subtract.json --output cache/trimmer/trimmed_world.json --characters-json cache/sync/characters.json --output-characters cache/trimmer/trimmed_characters.json",
+        "timeout": 30,
+        "script_group": "nvl"
+      },
+      "auto_flow": false,
+      "enable_complete_node_task": true,
+      "output_variable": "",
+      "enable_reject_upstream": false,
+      "max_reject_count": 3,
+      "save_output_to_file": false,
+      "output_file_path": "",
+      "sub_workflow_params": {},
+      "fail_auto_skip": false
+    },
+    {
+      "id": "script_render_trimmer",
+      "label": "渲染 → world_foundation_trimmed",
+      "node_type": "script",
+      "agent_type": "default",
+      "system_prompt_template": "",
+      "first_message": "",
+      "position": {
+        "x": 1450,
+        "y": 160
+      },
+      "var_bindings": {},
+      "node_params": {
+        "script_source": "library",
+        "script_type": "python",
+        "script_name": "db_sync",
+        "script_args": "--book-id {{book_id}} --chapter {{chapter_number}} --render cache/trimmer/trimmed_world.json --output story/{{chapter_number}}/world_foundation_trimmed.md",
+        "timeout": 30,
+        "script_group": "nvl"
+      },
+      "auto_flow": false,
+      "enable_complete_node_task": true,
+      "output_variable": "",
+      "enable_reject_upstream": false,
+      "max_reject_count": 3,
+      "save_output_to_file": false,
+      "output_file_path": "",
+      "sub_workflow_params": {},
+      "fail_auto_skip": false
+    },
+    {
+      "id": "agent_nw",
+      "label": "骨架写手",
+      "node_type": "agent",
+      "agent_type": "novel-writer",
+      "system_prompt_template": "",
+      "first_message": "「本章你要讲的这段故事」\n\n{{wroter_context}}\n\n━━ 写的时候记住 ━━\n\n• 🔴 你的全部输出必须是纯 JSON（不带 markdown 代码块包裹），读到末尾的「输出格式」章节确认 schema\n• 你产出的是带 [SLOT] 标记的叙事骨架——不是完整正文\n• 每个段落里至少要有：具体动作、有信息的对话、发现/决定、或可见位移之一\n• 别平均使力。冲突爆发的地方多写两百字也值得——但具体的对话和动作留给专项写手\n• 场景里的人不能是纸片人。哪怕配角也得有一个小动作让他活过来\n• 结尾别收干净。留一根刺\n• 情绪通过动作和感官细节传递——你写骨架里的情绪铺垫，具体内心活动留给内心写手\n• ⚠️ 段落聚合铁律：连贯的叙事流合并在同一段，不要把每个信息点切成独立段\n\n输出语言：{{language}}。你的所有产出内容——包括文件内容、JSON 字段值、分析报告——都必须使用 {{language}}。",
+      "position": {
+        "x": 710,
+        "y": 270
+      },
+      "var_bindings": {},
+      "node_params": {
+        "template_values": "{\"length_rule\":\"本章约2000字\",\"nervous_habits\":\"{{writer_type}}\"}"
+      },
+      "auto_flow": true,
+      "enable_complete_node_task": false,
+      "output_variable": "",
+      "enable_reject_upstream": false,
+      "max_reject_count": 3,
+      "save_output_to_file": true,
+      "output_file_path": "cache/writer/framework_writer.json",
+      "sub_workflow_params": {},
+      "fail_auto_skip": false
+    },
+    {
+      "id": "agent_dw",
+      "label": "对话写手",
+      "node_type": "agent",
+      "agent_type": "novel-dialogue-writer",
+      "system_prompt_template": "",
+      "first_message": "「本章你要讲的这段故事」\n\n骨架写手的 JSON 产出（提取你需要的槽名）：\n{{framework_writer_cache}}\n\n上下文：\n{{wroter_context}}\n\n━━\n骨架写手已产出 JSON 叙事骨架。你的任务：只填充 skeleton 中的 [SLOT_DIALOGUE_X] 对话槽。\n🔴 你的全部输出必须是纯 JSON（不带 markdown 代码块包裹），读到末尾的「输出格式」章节确认 schema。\n\n输出语言：{{language}}。你的所有产出内容——包括文件内容、JSON 字段值、分析报告——都必须使用 {{language}}。",
+      "position": {
+        "x": 150,
+        "y": 540
+      },
+      "var_bindings": {},
+      "node_params": {},
+      "auto_flow": true,
+      "enable_complete_node_task": false,
+      "output_variable": "",
+      "enable_reject_upstream": false,
+      "max_reject_count": 3,
+      "save_output_to_file": true,
+      "output_file_path": "cache/writer/dialogue_writer.json",
+      "sub_workflow_params": {},
+      "fail_auto_skip": false
+    },
+    {
+      "id": "agent_aw",
+      "label": "动作写手",
+      "node_type": "agent",
+      "agent_type": "novel-action-writer",
+      "system_prompt_template": "",
+      "first_message": "「本章你要讲的这段故事」\n\n骨架写手的 JSON 产出（提取你需要的槽名）：\n{{framework_writer_cache}}\n\n上下文：\n{{wroter_context}}\n\n━━\n骨架写手已产出 JSON 叙事骨架。你的任务：只填充 skeleton 中的 [SLOT_ACTION_X] 动作槽。\n🔴 你的全部输出必须是纯 JSON（不带 markdown 代码块包裹），读到末尾的「输出格式」章节确认 schema。\n\n输出语言：{{language}}。你的所有产出内容——包括文件内容、JSON 字段值、分析报告——都必须使用 {{language}}。",
+      "position": {
+        "x": 350,
+        "y": 450
+      },
+      "var_bindings": {},
+      "node_params": {},
+      "auto_flow": true,
+      "enable_complete_node_task": false,
+      "output_variable": "",
+      "enable_reject_upstream": false,
+      "max_reject_count": 3,
+      "save_output_to_file": true,
+      "output_file_path": "cache/writer/action_writer.json",
+      "sub_workflow_params": {},
+      "fail_auto_skip": false
+    },
+    {
+      "id": "agent_iw",
+      "label": "内心写手",
+      "node_type": "agent",
+      "agent_type": "novel-internal-writer",
+      "system_prompt_template": "",
+      "first_message": "「本章你要讲的这段故事」\n\n骨架写手的 JSON 产出（提取你需要的槽名）：\n{{framework_writer_cache}}\n\n上下文：\n{{wroter_context}}\n\n━━\n骨架写手已产出 JSON 叙事骨架。你的任务：只填充 skeleton 中的 [SLOT_INTERNAL_X] 内心槽。\n🔴 你的全部输出必须是纯 JSON（不带 markdown 代码块包裹），读到末尾的「输出格式」章节确认 schema。\n\n输出语言：{{language}}。你的所有产出内容——包括文件内容、JSON 字段值、分析报告——都必须使用 {{language}}。",
+      "position": {
+        "x": 520,
+        "y": 540
+      },
+      "var_bindings": {},
+      "node_params": {},
+      "auto_flow": true,
+      "enable_complete_node_task": false,
+      "output_variable": "",
+      "enable_reject_upstream": false,
+      "max_reject_count": 3,
+      "save_output_to_file": true,
+      "output_file_path": "cache/writer/internal_writer.json",
+      "sub_workflow_params": {},
+      "fail_auto_skip": false
+    },
+    {
+      "id": "agent_dsw",
+      "label": "描写写手",
+      "node_type": "agent",
+      "agent_type": "novel-description-writer",
+      "system_prompt_template": "",
+      "first_message": "「本章你要讲的这段故事」\n\n骨架写手的 JSON 产出（提取你需要的槽名）：\n{{framework_writer_cache}}\n\n上下文：\n{{wroter_context}}\n\n━━\n骨架写手已产出 JSON 叙事骨架。你的任务：只填充 skeleton 中的 [SLOT_DESCRIPTION_X] 描写槽。\n🔴 你的全部输出必须是纯 JSON（不带 markdown 代码块包裹），读到末尾的「输出格式」章节确认 schema。\n\n输出语言：{{language}}。你的所有产出内容——包括文件内容、JSON 字段值、分析报告——都必须使用 {{language}}。",
+      "position": {
+        "x": 660,
+        "y": 480
+      },
+      "var_bindings": {},
+      "node_params": {},
+      "auto_flow": true,
+      "enable_complete_node_task": false,
+      "output_variable": "",
+      "enable_reject_upstream": false,
+      "max_reject_count": 3,
+      "save_output_to_file": true,
+      "output_file_path": "cache/writer/description_writer.json",
+      "sub_workflow_params": {},
+      "fail_auto_skip": false
+    },
+    {
+      "id": "agent_tw",
+      "label": "过渡写手",
+      "node_type": "agent",
+      "agent_type": "novel-transition-writer",
+      "system_prompt_template": "",
+      "first_message": "「本章你要讲的这段故事」\n\n骨架写手的 JSON 产出（提取你需要的槽名）：\n{{framework_writer_cache}}\n\n上下文：\n{{wroter_context}}\n\n━━\n骨架写手已产出 JSON 叙事骨架。你的任务：只填充 skeleton 中的 [SLOT_TRANSITION_X] 过渡槽。\n🔴 你的全部输出必须是纯 JSON（不带 markdown 代码块包裹），读到末尾的「输出格式」章节确认 schema。\n\n输出语言：{{language}}。你的所有产出内容——包括文件内容、JSON 字段值、分析报告——都必须使用 {{language}}。",
+      "position": {
+        "x": 900,
+        "y": 420
+      },
+      "var_bindings": {},
+      "node_params": {},
+      "auto_flow": true,
+      "enable_complete_node_task": false,
+      "output_variable": "",
+      "enable_reject_upstream": false,
+      "max_reject_count": 3,
+      "save_output_to_file": true,
+      "output_file_path": "cache/writer/transition_writer.json",
+      "sub_workflow_params": {},
+      "fail_auto_skip": false
+    },
+    {
+      "id": "agent_si",
+      "label": "整合写手",
+      "node_type": "agent",
+      "agent_type": "novel-storyboard-integrator",
+      "system_prompt_template": "",
+      "first_message": "运行整合写手。本章：{{chapter_number}}。六个写手的 JSON 产出已由变量注入。\n\n=== 骨架写手 ===\n{{framework_writer_cache}}\n\n=== 对话写手 ===\n{{dialogue_writer_cache}}\n\n=== 动作写手 ===\n{{action_writer_cache}}\n\n=== 内心写手 ===\n{{internal_writer_cache}}\n\n=== 描写写手 ===\n{{description_writer_cache}}\n\n=== 过渡写手 ===\n{{transition_writer_cache}}\n\n━━\n你的任务：\n1. 解析以上六段 JSON\n2. 将 skeleton 中的 [SLOT_DIALOGUE/ACTION/INTERNAL/DESCRIPTION/TRANSITION_槽名] 替换为对应 JSON 中的内容\n3. 执行段落重排、润色打磨\n\n━━ 字数要求 ━━\n目标正文字数：{{target_word_count}}\n组装完成后请统计实际字数（不含 markdown 标记和空行）。如果低于目标范围下限，需要对文本进行轻微扩写（参考系统提示词中的 niw_expand 章节）。\n\n输出语言：{{language}}。你的所有产出内容——包括文件内容、JSON 字段值、分析报告——都必须使用 {{language}}。",
+      "position": {
+        "x": 470,
+        "y": 880
+      },
+      "var_bindings": {},
+      "node_params": {},
+      "auto_flow": true,
+      "enable_complete_node_task": false,
+      "output_variable": "",
+      "enable_reject_upstream": false,
+      "max_reject_count": 3,
+      "save_output_to_file": true,
+      "output_file_path": "cache/si/chapter.json",
+      "sub_workflow_params": {},
+      "fail_auto_skip": false
+    },
+    {
+      "id": "agent_sw",
+      "label": "单写手",
+      "node_type": "agent",
+      "agent_type": "novel-single-writer",
+      "system_prompt_template": "",
+      "first_message": "「本章你要讲的这段故事」\n\n{{wroter_context}}\n\n━━ 写的时候记住 ━━\n\n• 🔴 你的全部输出必须是纯 JSON（不带 markdown 代码块包裹），读到末尾的「产出」章节确认 schema：{\"body\": \"完整章节正文\"}\n• 你是一次成稿的写手，叙事、对话、动作、内心、描写一次完成\n• 每个段落里至少要有：具体动作、有信息的对话、发现/决定、或可见位移之一\n• 别平均使力，冲突爆发的地方多写两百字也值得\n• 场景里的人不能是纸片人。哪怕配角也得有一个小动作让他活过来\n• 结尾别收干净，留一根刺\n• 情绪通过动作和感官细节传递\n• ⚠️ 段落聚合铁律：连贯的叙事流合并在同一段，不要把每个信息点切成独立段\n\n━━ 字数要求 ━━\n目标正文字数：{{target_word_count}}\n\n写完正文后出声读一遍，顺手过五道自编辑关（参考系统提示词中的 sw_self_edit 章节）。\n\n输出语言：{{language}}。你的所有产出内容——包括文件内容、JSON 字段值、分析报告，都必须使用 {{language}}。",
+      "position": {
+        "x": 1780,
+        "y": 510
+      },
+      "var_bindings": {},
+      "node_params": {},
+      "auto_flow": true,
+      "enable_complete_node_task": false,
+      "output_variable": "",
+      "enable_reject_upstream": false,
+      "max_reject_count": 3,
+      "save_output_to_file": true,
+      "output_file_path": "cache/si/chapter.json",
+      "sub_workflow_params": {},
+      "fail_auto_skip": false
+    },
+    {
+      "id": "script_si_post",
+      "label": "SI 后处理",
+      "node_type": "script",
+      "agent_type": "default",
+      "system_prompt_template": "",
+      "first_message": "",
+      "position": {
+        "x": 1190,
+        "y": 550
+      },
+      "var_bindings": {},
+      "node_params": {
+        "script_source": "library",
+        "script_type": "python",
+        "script_name": "si_post",
+        "script_args": "--input cache/si/chapter.json",
+        "timeout": 30,
+        "script_group": "nvl"
+      },
+      "auto_flow": false,
+      "enable_complete_node_task": true,
+      "output_variable": "",
+      "enable_reject_upstream": false,
+      "max_reject_count": 3,
+      "save_output_to_file": false,
+      "output_file_path": "",
+      "sub_workflow_params": {},
+      "fail_auto_skip": false
+    },
+    {
+      "id": "sync_up_si",
+      "label": "落库·SI",
+      "node_type": "script",
+      "agent_type": "default",
+      "system_prompt_template": "",
+      "first_message": "",
+      "position": {
+        "x": 1250,
+        "y": 800
+      },
+      "var_bindings": {},
+      "node_params": {
+        "script_source": "library",
+        "script_type": "python",
+        "script_name": "db_sync",
+        "script_args": "--book-id {{book_id}} --chapter {{chapter_number}} --direction up --partial si --workflow-id {{_system.workflow_id}} --workflow-task-id {{_system.task_id}}",
+        "timeout": 30,
+        "script_group": "nvl"
+      },
+      "auto_flow": false,
+      "enable_complete_node_task": true,
+      "output_variable": "",
+      "enable_reject_upstream": false,
+      "max_reject_count": 3,
+      "save_output_to_file": false,
+      "output_file_path": "",
+      "sub_workflow_params": {},
+      "fail_auto_skip": false
+    },
+    {
+      "id": "script_render_we",
+      "label": "渲染 → world_state + world_events",
+      "node_type": "script",
+      "agent_type": "default",
+      "system_prompt_template": "",
+      "first_message": "",
+      "position": {
+        "x": -130,
+        "y": -50
+      },
+      "var_bindings": {},
+      "node_params": {
+        "script_source": "library",
+        "script_type": "python",
+        "script_name": "db_sync",
+        "script_args": "--book-id {{book_id}} --render cache/we/world_state.json,cache/we/world_events.json --output story/{{chapter_number}}/world_state.md,story/{{chapter_number}}/world_events.md",
+        "timeout": 30,
+        "script_group": "nvl"
+      },
+      "auto_flow": false,
+      "enable_complete_node_task": true,
+      "output_variable": "",
+      "enable_reject_upstream": false,
+      "max_reject_count": 3,
+      "save_output_to_file": false,
+      "output_file_path": "",
+      "sub_workflow_params": {},
+      "fail_auto_skip": false
+    },
+    {
+      "id": "script_render_od",
+      "label": "渲染 → guide + hooks + debts",
+      "node_type": "script",
+      "agent_type": "default",
+      "system_prompt_template": "",
+      "first_message": "",
+      "position": {
+        "x": 900,
+        "y": -330
+      },
+      "var_bindings": {},
+      "node_params": {
+        "script_source": "library",
+        "script_type": "python",
+        "script_name": "db_sync",
+        "script_args": "--book-id {{book_id}} --render cache/od/guide.json,cache/od/hooks.json,cache/od/debts.json --output story/{{chapter_number}}/single_chapter_guide.md,meta/hooks.md,meta/debts.md",
+        "timeout": 30,
+        "script_group": "nvl"
+      },
+      "auto_flow": false,
+      "enable_complete_node_task": true,
+      "output_variable": "",
+      "enable_reject_upstream": false,
+      "max_reject_count": 3,
+      "save_output_to_file": false,
+      "output_file_path": "",
+      "sub_workflow_params": {},
+      "fail_auto_skip": false
+    },
+    {
+      "id": "script_render_cm",
+      "label": "渲染 → character_state + minor",
+      "node_type": "script",
+      "agent_type": "default",
+      "system_prompt_template": "",
+      "first_message": "",
+      "position": {
+        "x": 1250,
+        "y": -190
+      },
+      "var_bindings": {},
+      "node_params": {
+        "script_source": "library",
+        "script_type": "python",
+        "script_name": "db_sync",
+        "script_args": "--book-id {{book_id}} --chapter {{chapter_number}} --render cache/cm/character_states.json,cache/cm/minor_characters.json --output story/{{chapter_number}}/character_state_long.md,story/{{chapter_number}}/character_minor.md",
+        "timeout": 30,
+        "script_group": "nvl"
+      },
+      "auto_flow": false,
+      "enable_complete_node_task": true,
+      "output_variable": "",
+      "enable_reject_upstream": false,
+      "max_reject_count": 3,
+      "save_output_to_file": false,
+      "output_file_path": "",
+      "sub_workflow_params": {},
+      "fail_auto_skip": false
+    },
+    {
+      "id": "script_render_si",
+      "label": "渲染 → chapter.md",
+      "node_type": "script",
+      "agent_type": "default",
+      "system_prompt_template": "",
+      "first_message": "",
+      "position": {
+        "x": 1000,
+        "y": 710
+      },
+      "var_bindings": {},
+      "node_params": {
+        "script_source": "library",
+        "script_type": "python",
+        "script_name": "db_sync",
+        "script_args": "--book-id {{book_id}} --render cache/si/body.json --output story/{{chapter_number}}/chapter.md",
+        "timeout": 30,
+        "script_group": "nvl"
+      },
+      "auto_flow": false,
+      "enable_complete_node_task": true,
+      "output_variable": "",
+      "enable_reject_upstream": false,
+      "max_reject_count": 3,
+      "save_output_to_file": false,
+      "output_file_path": "",
+      "sub_workflow_params": {},
+      "fail_auto_skip": false
+    },
+    {
+      "id": "script_render_trimmed_chars",
+      "label": "渲染 → character_profiles_trimmed",
+      "node_type": "script",
+      "agent_type": "default",
+      "system_prompt_template": "",
+      "first_message": "",
+      "position": {
+        "x": 1830,
+        "y": 280
+      },
+      "var_bindings": {},
+      "node_params": {
+        "script_source": "library",
+        "script_type": "python",
+        "script_name": "db_sync",
+        "script_args": "--book-id {{book_id}} --render cache/trimmer/trimmed_characters.json --output story/{{chapter_number}}/character_profiles_trimmed.md",
+        "timeout": 30,
+        "script_group": "nvl"
+      },
+      "auto_flow": false,
+      "enable_complete_node_task": true,
+      "output_variable": "",
+      "enable_reject_upstream": false,
+      "max_reject_count": 3,
+      "save_output_to_file": false,
+      "output_file_path": "",
+      "sub_workflow_params": {},
+      "fail_auto_skip": false
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge-agent_we-script_we_post",
+      "source": "agent_we",
+      "target": "script_we_post"
+    },
+    {
+      "id": "edge-sync_up_we-agent_id",
+      "source": "sync_up_we",
+      "target": "agent_id"
+    },
+    {
+      "id": "edge-agent_id-script_parse_intent",
+      "source": "agent_id",
+      "target": "script_parse_intent"
+    },
+    {
+      "id": "edge-script_parse_intent-agent_od",
+      "source": "script_parse_intent",
+      "target": "agent_od"
+    },
+    {
+      "id": "edge-agent_od-script_od_post",
+      "source": "agent_od",
+      "target": "script_od_post"
+    },
+    {
+      "id": "edge-sync_up_od-agent_cm",
+      "source": "sync_up_od",
+      "target": "agent_cm"
+    },
+    {
+      "id": "edge-agent_cm-script_cm_post",
+      "source": "agent_cm",
+      "target": "script_cm_post"
+    },
+    {
+      "id": "edge-sync_up_cm-agent_se",
+      "source": "sync_up_cm",
+      "target": "agent_se"
+    },
+    {
+      "id": "edge-sync_up_si-__end__",
+      "source": "sync_up_si",
+      "target": "__end__"
+    },
+    {
+      "id": "edge-syncdown-we",
+      "source": "script_sync_down",
+      "target": "agent_we"
+    },
+    {
+      "id": "edge-a3126a36",
+      "source": "script_we_post",
+      "target": "script_render_we"
+    },
+    {
+      "id": "edge-19693a38",
+      "source": "script_render_we",
+      "target": "sync_up_we"
+    },
+    {
+      "id": "edge-2d2593c8",
+      "source": "script_od_post",
+      "target": "script_render_od"
+    },
+    {
+      "id": "edge-311c083c",
+      "source": "script_render_od",
+      "target": "sync_up_od"
+    },
+    {
+      "id": "edge-5db8820b",
+      "source": "script_cm_post",
+      "target": "script_render_cm"
+    },
+    {
+      "id": "edge-5265366a",
+      "source": "script_render_cm",
+      "target": "sync_up_cm"
+    },
+    {
+      "id": "edge-269a2eac",
+      "source": "script_si_post",
+      "target": "script_render_si"
+    },
+    {
+      "id": "edge-8c4dc116",
+      "source": "script_render_si",
+      "target": "sync_up_si"
+    },
+    {
+      "id": "edge-__start__-script_sync_down",
+      "source": "__start__",
+      "target": "script_sync_down"
+    },
+    {
+      "id": "edge-agent_nw-gw-fork-2",
+      "source": "agent_nw",
+      "target": "gw-fork-2"
+    },
+    {
+      "id": "edge-gw-fork-2-agent_aw",
+      "source": "gw-fork-2",
+      "target": "agent_aw"
+    },
+    {
+      "id": "edge-gw-fork-2-agent_dw",
+      "source": "gw-fork-2",
+      "target": "agent_dw"
+    },
+    {
+      "id": "edge-gw-fork-2-agent_dsw",
+      "source": "gw-fork-2",
+      "target": "agent_dsw"
+    },
+    {
+      "id": "edge-gw-fork-2-agent_iw",
+      "source": "gw-fork-2",
+      "target": "agent_iw"
+    },
+    {
+      "id": "edge-gw-fork-2-agent_tw",
+      "source": "gw-fork-2",
+      "target": "agent_tw"
+    },
+    {
+      "id": "edge-agent_tw-gw-conv-2",
+      "source": "agent_tw",
+      "target": "gw-conv-2"
+    },
+    {
+      "id": "edge-agent_dsw-gw-conv-2",
+      "source": "agent_dsw",
+      "target": "gw-conv-2"
+    },
+    {
+      "id": "edge-agent_iw-gw-conv-2",
+      "source": "agent_iw",
+      "target": "gw-conv-2"
+    },
+    {
+      "id": "edge-agent_aw-gw-conv-2",
+      "source": "agent_aw",
+      "target": "gw-conv-2"
+    },
+    {
+      "id": "edge-agent_dw-gw-conv-2",
+      "source": "agent_dw",
+      "target": "gw-conv-2"
+    },
+    {
+      "id": "edge-gw-conv-2-agent_si",
+      "source": "gw-conv-2",
+      "target": "agent_si"
+    },
+    {
+      "id": "edge-agent_se-agent_trimmer",
+      "source": "agent_se",
+      "target": "script_se_post"
+    },
+    {
+      "id": "edge-agent_trimmer-script_trimmer_post",
+      "source": "agent_trimmer",
+      "target": "script_trimmer_post"
+    },
+    {
+      "id": "edge-script_trimmer_post-script_render_trimmer",
+      "source": "script_trimmer_post",
+      "target": "script_render_trimmer"
+    },
+    {
+      "id": "edge-script_render_trimmer-agent_nw",
+      "source": "script_render_trimmer",
+      "target": "script_render_trimmed_chars"
+    },
+    {
+      "id": "edge-script_se_post-agent_trimmer",
+      "source": "script_se_post",
+      "target": "agent_trimmer"
+    },
+    {
+      "id": "edge-script_render_trimmed_chars-gw-mqdqscyd-0",
+      "source": "script_render_trimmed_chars",
+      "target": "gw-mqdqscyd-0"
+    },
+    {
+      "id": "edge-gw-mqdqscyd-0-agent_nw",
+      "source": "gw-mqdqscyd-0",
+      "target": "agent_nw",
+      "condition": {
+        "expression": "{{writer_type}}==muti",
+        "label": "写手群",
+        "is_default": false
+      }
+    },
+    {
+      "id": "edge-gw-mqdqscyd-0-agent_sw",
+      "source": "gw-mqdqscyd-0",
+      "target": "agent_sw",
+      "condition": {
+        "expression": "",
+        "label": "默认",
+        "is_default": true
+      }
+    },
+    {
+      "id": "edge-agent_sw-script_si_post",
+      "source": "agent_sw",
+      "target": "script_si_post"
+    },
+    {
+      "id": "edge-agent_si-script_si_post",
+      "source": "agent_si",
+      "target": "script_si_post"
+    }
+  ],
+  "variables": [
+    {
+      "key": "book_id",
+      "name": "书 UUID",
+      "type": "text",
+      "default": "",
+      "required": true,
+      "description": "",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": false
+    },
+    {
+      "key": "prev_world_state",
+      "name": "上一章世界状态",
+      "type": "file",
+      "default": "story/{{prev_chapter}}/world_state.md",
+      "required": false,
+      "description": "首章为空",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": true
+    },
+    {
+      "key": "prev_world_events",
+      "name": "上一章世界事件",
+      "type": "file",
+      "default": "story/{{prev_chapter}}/world_events.md",
+      "required": false,
+      "description": "首章为空",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": true
+    },
+    {
+      "key": "prev_diff_world",
+      "name": "上一章后验裁决",
+      "type": "file",
+      "default": "story/{{prev_chapter}}/diff_world_resolved.md",
+      "required": false,
+      "description": "首章为空",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": true
+    },
+    {
+      "key": "hooks_file",
+      "name": "伏笔列表",
+      "type": "file",
+      "default": "meta/hooks.md",
+      "required": false,
+      "description": "",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": true
+    },
+    {
+      "key": "debts_file",
+      "name": "叙事债务",
+      "type": "file",
+      "default": "meta/debts.md",
+      "required": false,
+      "description": "",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": true
+    },
+    {
+      "key": "volume_outline_file",
+      "name": "卷纲",
+      "type": "file",
+      "default": "outline/volume_outline.md",
+      "required": false,
+      "description": "首章可能不存在",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": true
+    },
+    {
+      "key": "near_term_outline_file",
+      "name": "近纲",
+      "type": "file",
+      "default": "outline/near_term_outline.md",
+      "required": false,
+      "description": "首章可能不存在",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": true
+    },
+    {
+      "key": "near_term_we_file",
+      "name": "近纲（世界引擎用）",
+      "type": "file",
+      "default": "cache/sync/near_term_we.md",
+      "required": false,
+      "description": "仅含章节摘要+时间推进，供世界状态机消费",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": true
+    },
+    {
+      "key": "diff_story_file",
+      "name": "上一章后验裁决",
+      "type": "file",
+      "default": "story/{{prev_chapter}}/diff_story_confirmed.md",
+      "required": false,
+      "description": "首章不存在",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": true
+    },
+    {
+      "key": "prev_character_state",
+      "name": "上一章长线状态",
+      "type": "file",
+      "default": "story/{{prev_chapter}}/character_state_long.md",
+      "required": false,
+      "description": "首章为空",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": true
+    },
+    {
+      "key": "prev_character_minor",
+      "name": "上一章次要角色库",
+      "type": "file",
+      "default": "story/{{prev_chapter}}/character_minor.md",
+      "required": false,
+      "description": "首章为空",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": true
+    },
+    {
+      "key": "prev_diff_character",
+      "name": "上章角色差异",
+      "type": "file",
+      "default": "story/{{prev_chapter}}/diff_character.md",
+      "required": false,
+      "description": "首章不存在",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": true
+    },
+    {
+      "key": "chapter_number",
+      "name": "章节号",
+      "type": "text",
+      "default": "0001",
+      "required": true,
+      "description": "",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": false
+    },
+    {
+      "key": "prev_chapter",
+      "name": "上一章节号",
+      "type": "text",
+      "default": "0000",
+      "required": true,
+      "description": "",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": false
+    },
+    {
+      "key": "guide_file",
+      "name": "单章指导",
+      "type": "file",
+      "default": "story/{{chapter_number}}/single_chapter_guide.md",
+      "required": false,
+      "description": "",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": true
+    },
+    {
+      "key": "storyboard_file",
+      "name": "原始分镜",
+      "type": "file",
+      "default": "story/{{chapter_number}}/storyboard.md",
+      "required": false,
+      "description": "",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": true
+    },
+    {
+      "key": "storyboard_final_file",
+      "name": "分镜契约",
+      "type": "file",
+      "default": "story/{{chapter_number}}/storyboard_final.md",
+      "required": false,
+      "description": "",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": true
+    },
+    {
+      "key": "prev_storyboard_file",
+      "name": "上一章分镜",
+      "type": "file",
+      "default": "story/{{prev_chapter}}/storyboard.md",
+      "required": false,
+      "description": "首章不存在",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": true
+    },
+    {
+      "key": "character_state_long_file",
+      "name": "长线角色状态",
+      "type": "file",
+      "default": "story/{{chapter_number}}/character_state_long.md",
+      "required": false,
+      "description": "",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": true
+    },
+    {
+      "key": "character_minor_file",
+      "name": "次要角色库",
+      "type": "file",
+      "default": "story/{{chapter_number}}/character_minor.md",
+      "required": false,
+      "description": "",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": true
+    },
+    {
+      "key": "story_plan_file",
+      "name": "故事规划",
+      "type": "file",
+      "default": "meta/story_plan.md",
+      "required": false,
+      "description": "",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": true
+    },
+    {
+      "key": "world_foundation_file",
+      "name": "世界观总纲",
+      "type": "file",
+      "default": "meta/world_foundation.md",
+      "required": false,
+      "description": "",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": true
+    },
+    {
+      "key": "character_profiles_file",
+      "name": "角色档案",
+      "type": "file",
+      "default": "meta/character_profiles.md",
+      "required": false,
+      "description": "",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": true
+    },
+    {
+      "key": "world_events_file",
+      "name": "世界事件",
+      "type": "file",
+      "default": "story/{{chapter_number}}/world_events.md",
+      "required": false,
+      "description": "",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": true
+    },
+    {
+      "key": "sync_world_json",
+      "name": "世界裁剪·原始 JSON",
+      "type": "file",
+      "default": "cache/sync/world.json",
+      "required": false,
+      "description": "sync_down 时 dump 的 6 维度原始 JSON，供 trimmer 使用",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": true
+    },
+    {
+      "key": "trimmed_world_json",
+      "name": "世界裁剪·裁剪后 JSON",
+      "type": "file",
+      "default": "cache/trimmer/trimmed_world.json",
+      "required": false,
+      "description": "trimmer_post 产出的裁剪后 JSON，供渲染使用",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": true
+    },
+    {
+      "key": "world_foundation_trimmed_file",
+      "name": "世界观基础（裁剪版）",
+      "type": "file",
+      "default": "story/{{chapter_number}}/world_foundation_trimmed.md",
+      "required": false,
+      "description": "裁剪后渲染的 MD，供写手使用",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": true
+    },
+    {
+      "key": "world_state_file",
+      "name": "世界状态",
+      "type": "file",
+      "default": "story/{{chapter_number}}/world_state.md",
+      "required": false,
+      "description": "",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": true
+    },
+    {
+      "key": "style_guide_file",
+      "name": "风格指南",
+      "type": "file",
+      "default": "meta/style_profile.md",
+      "required": false,
+      "description": "",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": true
+    },
+    {
+      "key": "character_voice_file",
+      "name": "角色声音锚",
+      "type": "file",
+      "default": "meta/character_voice.md",
+      "required": false,
+      "description": "",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": true
+    },
+    {
+      "key": "human_intent",
+      "name": "人类意图",
+      "type": "textarea",
+      "default": "",
+      "required": false,
+      "description": "人类对本章的意图指令。分发器读取后拆分为 OD 和 SE 两路",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": false
+    },
+    {
+      "key": "world_intent",
+      "name": "世界意图",
+      "type": "textarea",
+      "default": "",
+      "required": false,
+      "description": "世界层的人类意图指令。直入世界状态机，注入世界级推力（瘟疫、天灾、势力变动等）。空值则按正常世界规则自主推演",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": false
+    },
+    {
+      "key": "od_intent",
+      "name": "大纲导演意图",
+      "type": "text",
+      "default": "",
+      "required": false,
+      "description": "意图分发器拆分后给大纲导演的指令",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": true
+    },
+    {
+      "key": "se_intent",
+      "name": "意图导演意图",
+      "type": "text",
+      "default": "",
+      "required": false,
+      "description": "意图分发器拆分后给意图导演的指令",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": true
+    },
+    {
+      "key": "target_word_count",
+      "name": "目标字数",
+      "type": "text",
+      "default": "3000-4000",
+      "required": false,
+      "description": "本章建议正文字数范围。高潮章可到 5000-6000，过渡章收紧到 2500-3500",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": false
+    },
+    {
+      "key": "wroter_context",
+      "name": "写手上下文",
+      "type": "textarea",
+      "default": "================================================================================\n✍️ 风格指南\n================================================================================\n{{style_guide_file}}\n\n================================================================================\n🎭 角色声音锚\n================================================================================\n{{character_voice_file}}\n\n================================================================================\n📊 长线角色状态\n================================================================================\n{{character_state_long_file}}\n\n================================================================================\n📋 本章大纲\n================================================================================\n{{guide_file}}\n\n================================================================================\n📡 本章世界状态\n================================================================================\n{{world_state_file}}\n\n================================================================================\n🌍 世界观基础（本章相关）\n================================================================================\n{{world_foundation_trimmed_file}}\\n\\n================================================================================\\n📋 次要角色注册表\\n================================================================================\\n{{character_minor_file}}",
+      "required": false,
+      "description": "",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": true
+    },
+    {
+      "key": "framework_writer_cache",
+      "name": "骨架写手 缓存",
+      "type": "file",
+      "default": "cache/writer/framework_writer.json",
+      "required": false,
+      "description": "",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": true
+    },
+    {
+      "key": "dialogue_writer_cache",
+      "name": "对话写手 缓存",
+      "type": "file",
+      "default": "cache/writer/dialogue_writer.json",
+      "required": false,
+      "description": "",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": true
+    },
+    {
+      "key": "action_writer_cache",
+      "name": "动作写手 缓存",
+      "type": "file",
+      "default": "cache/writer/action_writer.json",
+      "required": false,
+      "description": "",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": true
+    },
+    {
+      "key": "internal_writer_cache",
+      "name": "内心写手 缓存",
+      "type": "file",
+      "default": "cache/writer/internal_writer.json",
+      "required": false,
+      "description": "",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": true
+    },
+    {
+      "key": "description_writer_cache",
+      "name": "描写写手 缓存",
+      "type": "file",
+      "default": "cache/writer/description_writer.json",
+      "required": false,
+      "description": "",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": true
+    },
+    {
+      "key": "transition_writer_cache",
+      "name": "过渡写手 缓存",
+      "type": "file",
+      "default": "cache/writer/transition_writer.json",
+      "required": false,
+      "description": "",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": true
+    },
+    {
+      "key": "language",
+      "name": "输出语言",
+      "type": "text",
+      "default": "中文",
+      "required": true,
+      "description": "所有 agent 的产出语言。中文 / English",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": false
+    },
+    {
+      "key": "characters_json_file",
+      "name": "角色 JSON（裁剪用）",
+      "type": "file",
+      "default": "cache/sync/characters.json",
+      "required": false,
+      "description": "sync_down 产出的角色基本信息 JSON，供 trimmer 裁剪",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": true
+    },
+    {
+      "key": "trimmed_characters_json",
+      "name": "裁剪后角色 JSON",
+      "type": "file",
+      "default": "cache/trimmer/trimmed_characters.json",
+      "required": false,
+      "description": "trimmer_post 产出的裁剪后角色 JSON",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": true
+    },
+    {
+      "key": "character_profiles_trimmed_file",
+      "name": "角色档案（裁剪版）",
+      "type": "file",
+      "default": "story/{{chapter_number}}/character_profiles_trimmed.md",
+      "required": false,
+      "description": "裁剪后渲染的角色档案 MD，供写手使用",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": true
+    },
+    {
+      "key": "writer_type",
+      "name": "写手模式",
+      "type": "text",
+      "default": "single",
+      "required": true,
+      "description": "",
+      "options": [],
+      "source_type": "input",
+      "source_node_id": "",
+      "hidden": false
+    }
+  ],
+  "gateways": [
+    {
+      "id": "gw-fork-2",
+      "gateway_type": "parallel",
+      "label": "并行填槽",
+      "position": {
+        "x": 470,
+        "y": 260
+      },
+      "converge_gateway_id": "gw-conv-2"
+    },
+    {
+      "id": "gw-conv-2",
+      "gateway_type": "converge",
+      "label": "汇聚",
+      "position": {
+        "x": 490,
+        "y": 740
+      },
+      "converge_gateway_id": null
+    },
+    {
+      "id": "gw-mqdqscyd-0",
+      "gateway_type": "condition",
+      "label": "条件网关",
+      "position": {
+        "x": 1620,
+        "y": 300
+      },
+      "converge_gateway_id": null
+    }
+  ],
+  "start_position": {
+    "x": 300,
+    "y": 50
+  },
+  "end_position": {
+    "x": 1120,
+    "y": 960
+  }
+}
