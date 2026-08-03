@@ -1,11 +1,11 @@
 {
   "workflow_id": "mvp",
   "name": "章节生产管线",
-  "version": 1,
+  "version": 2,
   "nodes": [
     {
       "id": "script_sync_down",
-      "label": "DB 同步下拉",
+      "label": "准备本地章节上下文",
       "node_type": "script",
       "agent_type": "default",
       "system_prompt_template": "",
@@ -18,8 +18,8 @@
       "node_params": {
         "script_source": "library",
         "script_type": "python",
-        "script_name": "db_sync",
-        "script_args": "--book-id {{book_id}} --chapter {{chapter_number}} --prev-chapter {{prev_chapter}} --templates world,character,character_json,voice,style,story_plan,hooks,debts,volume,near_term,near_term_we,prev_ws,prev_we,prev_cs,prev_cm,prev_diff_world,prev_diff_story,prev_diff_char,guide,cs,cm",
+        "script_name": "local_archive",
+        "script_args": "prepare --context --require meta/world_foundation.md,meta/character_profiles.md,meta/character_voice.md,meta/style_profile.md,meta/story_plan.md,outline/volume_outline.md,outline/near_term_outline.md",
         "timeout": "30",
         "script_group": "nvl"
       },
@@ -88,7 +88,7 @@
     },
     {
       "id": "sync_up_we",
-      "label": "落库·WE",
+      "label": "本地存档·WE",
       "node_type": "script",
       "agent_type": "default",
       "system_prompt_template": "",
@@ -101,8 +101,8 @@
       "node_params": {
         "script_source": "library",
         "script_type": "python",
-        "script_name": "db_sync",
-        "script_args": "--book-id {{book_id}} --chapter {{chapter_number}} --direction up --partial we --workflow-id {{_system.workflow_id}} --workflow-task-id {{_system.task_id}}",
+        "script_name": "local_archive",
+        "script_args": "checkpoint --files cache/we/world_state.json,cache/we/world_events.json",
         "timeout": 30,
         "script_group": "nvl"
       },
@@ -254,7 +254,7 @@
     },
     {
       "id": "sync_up_od",
-      "label": "落库·OD",
+      "label": "本地存档·OD",
       "node_type": "script",
       "agent_type": "default",
       "system_prompt_template": "",
@@ -267,8 +267,8 @@
       "node_params": {
         "script_source": "library",
         "script_type": "python",
-        "script_name": "db_sync",
-        "script_args": "--book-id {{book_id}} --chapter {{chapter_number}} --direction up --partial od --workflow-id {{_system.workflow_id}} --workflow-task-id {{_system.task_id}}",
+        "script_name": "local_archive",
+        "script_args": "checkpoint --files cache/od/guide.json,cache/od/hooks.json,cache/od/debts.json --merge-hooks cache/od/hooks.json --merge-debts cache/od/debts.json",
         "timeout": 30,
         "script_group": "nvl"
       },
@@ -337,7 +337,7 @@
     },
     {
       "id": "sync_up_cm",
-      "label": "落库·CM",
+      "label": "本地存档·CM",
       "node_type": "script",
       "agent_type": "default",
       "system_prompt_template": "",
@@ -350,8 +350,8 @@
       "node_params": {
         "script_source": "library",
         "script_type": "python",
-        "script_name": "db_sync",
-        "script_args": "--book-id {{book_id}} --chapter {{chapter_number}} --direction up --partial cm --workflow-id {{_system.workflow_id}} --workflow-task-id {{_system.task_id}}",
+        "script_name": "local_archive",
+        "script_args": "checkpoint --files cache/cm/character_states.json,cache/cm/minor_characters.json",
         "timeout": 30,
         "script_group": "nvl"
       },
@@ -456,8 +456,8 @@
       "node_params": {
         "script_source": "library",
         "script_type": "python",
-        "script_name": "db_sync",
-        "script_args": "--book-id {{book_id}} --chapter {{chapter_number}} --render cache/trimmer/trimmed_world.json --output story/{{chapter_number}}/world_foundation_trimmed.md",
+        "script_name": "local_archive",
+        "script_args": "render --inputs cache/trimmer/trimmed_world.json --outputs story/{{chapter_number}}/world_foundation_trimmed.md",
         "timeout": 30,
         "script_group": "nvl"
       },
@@ -689,7 +689,7 @@
     },
     {
       "id": "sync_up_si",
-      "label": "落库·SI",
+      "label": "本地存档·SI",
       "node_type": "script",
       "agent_type": "default",
       "system_prompt_template": "",
@@ -702,8 +702,8 @@
       "node_params": {
         "script_source": "library",
         "script_type": "python",
-        "script_name": "db_sync",
-        "script_args": "--book-id {{book_id}} --chapter {{chapter_number}} --direction up --partial si --workflow-id {{_system.workflow_id}} --workflow-task-id {{_system.task_id}}",
+        "script_name": "local_archive",
+        "script_args": "checkpoint --files cache/si/body.json,cache/se/se_output.json",
         "timeout": 30,
         "script_group": "nvl"
       },
@@ -732,8 +732,8 @@
       "node_params": {
         "script_source": "library",
         "script_type": "python",
-        "script_name": "db_sync",
-        "script_args": "--book-id {{book_id}} --render cache/we/world_state.json,cache/we/world_events.json --output story/{{chapter_number}}/world_state.md,story/{{chapter_number}}/world_events.md",
+        "script_name": "local_archive",
+        "script_args": "render --inputs cache/we/world_state.json,cache/we/world_events.json --outputs story/{{chapter_number}}/world_state.md,story/{{chapter_number}}/world_events.md",
         "timeout": 30,
         "script_group": "nvl"
       },
@@ -762,8 +762,8 @@
       "node_params": {
         "script_source": "library",
         "script_type": "python",
-        "script_name": "db_sync",
-        "script_args": "--book-id {{book_id}} --render cache/od/guide.json,cache/od/hooks.json,cache/od/debts.json --output story/{{chapter_number}}/single_chapter_guide.md,meta/hooks.md,meta/debts.md",
+        "script_name": "local_archive",
+        "script_args": "render --inputs cache/od/guide.json,archive/hooks.json,archive/debts.json --outputs story/{{chapter_number}}/single_chapter_guide.md,meta/hooks.md,meta/debts.md",
         "timeout": 30,
         "script_group": "nvl"
       },
@@ -792,8 +792,8 @@
       "node_params": {
         "script_source": "library",
         "script_type": "python",
-        "script_name": "db_sync",
-        "script_args": "--book-id {{book_id}} --chapter {{chapter_number}} --render cache/cm/character_states.json,cache/cm/minor_characters.json --output story/{{chapter_number}}/character_state_long.md,story/{{chapter_number}}/character_minor.md",
+        "script_name": "local_archive",
+        "script_args": "render --inputs cache/cm/character_states.json,cache/cm/minor_characters.json --outputs story/{{chapter_number}}/character_state_long.md,story/{{chapter_number}}/character_minor.md",
         "timeout": 30,
         "script_group": "nvl"
       },
@@ -822,8 +822,8 @@
       "node_params": {
         "script_source": "library",
         "script_type": "python",
-        "script_name": "db_sync",
-        "script_args": "--book-id {{book_id}} --render cache/si/body.json --output story/{{chapter_number}}/chapter.md",
+        "script_name": "local_archive",
+        "script_args": "render --inputs cache/si/body.json --outputs story/{{chapter_number}}/chapter.md",
         "timeout": 30,
         "script_group": "nvl"
       },
@@ -852,8 +852,8 @@
       "node_params": {
         "script_source": "library",
         "script_type": "python",
-        "script_name": "db_sync",
-        "script_args": "--book-id {{book_id}} --render cache/trimmer/trimmed_characters.json --output story/{{chapter_number}}/character_profiles_trimmed.md",
+        "script_name": "local_archive",
+        "script_args": "render --inputs cache/trimmer/trimmed_characters.json --outputs story/{{chapter_number}}/character_profiles_trimmed.md",
         "timeout": 30,
         "script_group": "nvl"
       },
@@ -1086,18 +1086,6 @@
     }
   ],
   "variables": [
-    {
-      "key": "book_id",
-      "name": "书 UUID",
-      "type": "text",
-      "default": "",
-      "required": true,
-      "description": "",
-      "options": [],
-      "source_type": "input",
-      "source_node_id": "",
-      "hidden": false
-    },
     {
       "key": "prev_world_state",
       "name": "上一章世界状态",

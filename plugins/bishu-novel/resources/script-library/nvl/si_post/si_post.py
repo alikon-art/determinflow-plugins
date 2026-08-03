@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""SI 后处理：chapter.json → body.json（纯拆分，MD 由 db_sync --render 渲染）"""
+"""SI 后处理：chapter.json → body.json。"""
 
 import argparse, json, os
 

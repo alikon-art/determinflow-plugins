@@ -1,11 +1,11 @@
 {
   "workflow_id": "story-plan",
   "name": "故事宏观规划",
-  "version": 1,
+  "version": 2,
   "nodes": [
     {
       "id": "script_sync_down",
-      "label": "DB同步→文件",
+      "label": "检查本地前置存档",
       "node_type": "script",
       "agent_type": "default",
       "system_prompt_template": "",
@@ -18,8 +18,8 @@
       "node_params": {
         "script_source": "library",
         "script_type": "python",
-        "script_name": "db_sync",
-        "script_args": "--book-id '{{book_id}}' --templates world,character",
+        "script_name": "local_archive",
+        "script_args": "prepare --require meta/world_foundation.md,meta/character_profiles.md",
         "timeout": "30",
         "script_group": "nvl"
       },
@@ -81,7 +81,7 @@
     },
     {
       "id": "script_persist_story_plan",
-      "label": "故事规划落库",
+      "label": "故事规划本地存档",
       "node_type": "script",
       "agent_type": "default",
       "system_prompt_template": "",
@@ -94,8 +94,8 @@
       "node_params": {
         "script_source": "library",
         "script_type": "python",
-        "script_name": "json_to_db",
-        "script_args": "--action upsert-story-plan --book-id '{{book_id}}' --story-plan 'cache/story_plan/story_plan.json' --workflow-id {{_system.workflow_id}} --workflow-task-id {{_system.task_id}}",
+        "script_name": "local_archive",
+        "script_args": "checkpoint --files cache/story_plan/story_plan.json",
         "timeout": "30",
         "script_group": "nvl"
       },
@@ -111,7 +111,7 @@
     },
     {
       "id": "script_persist_style_profile",
-      "label": "风格档案落库",
+      "label": "风格档案本地存档",
       "node_type": "script",
       "agent_type": "default",
       "system_prompt_template": "",
@@ -124,8 +124,8 @@
       "node_params": {
         "script_source": "library",
         "script_type": "python",
-        "script_name": "json_to_db",
-        "script_args": "--action upsert-style-profile --book-id '{{book_id}}' --style-profile 'cache/story_plan/style_profile.json' --workflow-id {{_system.workflow_id}} --workflow-task-id {{_system.task_id}}",
+        "script_name": "local_archive",
+        "script_args": "checkpoint --files cache/story_plan/style_profile.json",
         "timeout": "30",
         "script_group": "nvl"
       },
@@ -154,8 +154,8 @@
       "node_params": {
         "script_source": "library",
         "script_type": "python",
-        "script_name": "db_sync",
-        "script_args": "--book-id '{{book_id}}' --render 'cache/story_plan/story_plan.json' --output 'meta/story_plan.md'",
+        "script_name": "local_archive",
+        "script_args": "render --inputs cache/story_plan/story_plan.json --outputs meta/story_plan.md",
         "timeout": "30",
         "script_group": "nvl"
       },
@@ -184,8 +184,8 @@
       "node_params": {
         "script_source": "library",
         "script_type": "python",
-        "script_name": "db_sync",
-        "script_args": "--book-id '{{book_id}}' --render 'cache/story_plan/style_profile.json' --output 'meta/style_profile.md'",
+        "script_name": "local_archive",
+        "script_args": "render --inputs cache/story_plan/style_profile.json --outputs meta/style_profile.md",
         "timeout": "30",
         "script_group": "nvl"
       },
@@ -243,18 +243,6 @@
     }
   ],
   "variables": [
-    {
-      "key": "book_id",
-      "name": "书籍ID",
-      "type": "text",
-      "default": "",
-      "required": true,
-      "description": "书籍 UUID，建书 API 返回",
-      "options": [],
-      "source_type": "input",
-      "source_node_id": "",
-      "hidden": false
-    },
     {
       "key": "premise",
       "name": "题材创意",

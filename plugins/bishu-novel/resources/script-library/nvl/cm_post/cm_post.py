@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CM 后处理：cm_output.json → character_states.json + minor_characters.json（纯拆分，MD 由 db_sync --render 渲染）"""
+"""CM 后处理：cm_output.json → character_states.json + minor_characters.json。"""
 
 import argparse, json, os
 

@@ -4,11 +4,6 @@ import json
 import tomllib
 from pathlib import Path
 
-from ai_company_plugin_bishu_novel.backend.novel.schemas import (
-    GenerateChapterRequest,
-)
-
-
 PLUGIN_ROOT = Path(__file__).resolve().parents[1]
 EXPECTED_WORKFLOWS = {
     "build",
@@ -22,9 +17,8 @@ EXPECTED_WORKFLOWS = {
 EXPECTED_SCRIPT_LIBRARIES = {
     "ai_detect",
     "cm_post",
-    "db_sync",
-    "json_to_db",
     "json_to_md",
+    "local_archive",
     "no_post",
     "od_post",
     "parse_intent",
@@ -35,29 +29,22 @@ EXPECTED_SCRIPT_LIBRARIES = {
     "vo_post",
     "we_post",
 }
-UNSUPPORTED_SCHEMA_KEYS = {"additionalProperties", "minLength", "writeOnly"}
 
 
 def _json(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def _schema_keys(schema: dict) -> set[str]:
-    keys = set(schema)
-    for child in schema.get("properties", {}).values():
-        keys.update(_schema_keys(child))
-    return keys
-
-
-def test_manifest_and_settings_contract() -> None:
+def test_manifest_is_resource_only() -> None:
     manifest = tomllib.loads(
         (PLUGIN_ROOT / "extension.toml").read_text(encoding="utf-8")
     )
     assert manifest["extension"]["id"] == "bishu-novel"
-    assert manifest["extension"]["version"] == "0.1.0"
-    assert manifest["extension"]["backend"] == (
-        "ai_company_plugin_bishu_novel.backend.extension:create_extension"
-    )
+    assert manifest["extension"]["version"] == "0.2.0"
+    assert "backend" not in manifest["extension"]
+    assert "installation" not in manifest
+    assert "lifecycle" not in manifest
+    assert "settings" not in manifest
     assert manifest["resource_namespace"]["prefix"] == "bishu-novel"
     assert set(manifest["resources"]) == {
         "agents",
@@ -65,21 +52,6 @@ def test_manifest_and_settings_contract() -> None:
         "workflows",
         "script_libraries",
     }
-
-    schema = _json(PLUGIN_ROOT / "settings.schema.json")
-    assert schema["type"] == "object"
-    assert {
-        "DB_HOST",
-        "DB_PORT",
-        "DB_NAME",
-        "DB_USER",
-        "DB_PASSWORD",
-        "AI_DETECT_GATEWAY_URL",
-    } <= set(schema["properties"])
-    assert not (_schema_keys(schema) & UNSUPPORTED_SCHEMA_KEYS)
-    assert schema["properties"]["DB_PASSWORD"]["format"] == "password"
-    assert "default" not in schema["properties"]["DB_PASSWORD"]
-    assert "default" not in schema["properties"]["ENGINE_SIGN_KEYS"]
 
 
 def test_resource_graph_contains_only_referenced_production_resources() -> None:
@@ -97,7 +69,7 @@ def test_resource_graph_contains_only_referenced_production_resources() -> None:
     for definition_path in definitions:
         definition = _json(definition_path)
         assert definition["workflow_id"] == definition_path.parent.name
-        assert definition["version"] == 1
+        assert definition["version"] == 2
         if definition["workflow_id"] == "mvp":
             assert not definition.get("execution_schemes")
         for node in definition.get("nodes", []):
@@ -121,14 +93,15 @@ def test_resource_graph_contains_only_referenced_production_resources() -> None:
     } == EXPECTED_SCRIPT_LIBRARIES
 
 
-def test_chapter_api_exposes_only_production_controls() -> None:
-    debug_fields = {
-        "execution_mode",
-        "execution_scheme_id",
-        "selected_node_ids",
-        "disabled_node_ids",
-    }
-    assert not (set(GenerateChapterRequest.model_fields) & debug_fields)
+def test_workflows_do_not_require_database_or_book_ids() -> None:
+    for definition_path in (
+        PLUGIN_ROOT / "resources" / "workflows"
+    ).glob("*/definition.json"):
+        content = definition_path.read_text(encoding="utf-8").lower()
+        assert "book_id" not in content
+        assert "uuid" not in content
+        assert "db_sync" not in content
+        assert "json_to_db" not in content
 
 
 def test_public_package_has_no_private_pipeline_markers() -> None:
@@ -155,18 +128,3 @@ def test_public_package_has_no_private_pipeline_markers() -> None:
     assert not (resources / "skills.json").exists()
     assert not (resources / "rules.json").exists()
     assert not (resources / "preset-phrases.json").exists()
-
-
-def test_example_secrets_are_empty() -> None:
-    values = {}
-    for raw_line in (PLUGIN_ROOT / ".env.example").read_text(
-        encoding="utf-8"
-    ).splitlines():
-        line = raw_line.strip()
-        if not line or line.startswith("#") or "=" not in line:
-            continue
-        key, value = line.split("=", 1)
-        values[key] = value
-
-    assert values["DB_PASSWORD"] == ""
-    assert values["ENGINE_SIGN_KEYS"] == ""

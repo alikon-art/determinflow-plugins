@@ -1,11 +1,11 @@
 {
   "workflow_id": "character",
   "name": "角色创建管线",
-  "version": 1,
+  "version": 2,
   "nodes": [
     {
       "id": "script_sync_down",
-      "label": "DB同步→文件",
+      "label": "检查本地世界观",
       "node_type": "script",
       "agent_type": "default",
       "system_prompt_template": "",
@@ -18,8 +18,8 @@
       "node_params": {
         "script_source": "library",
         "script_type": "python",
-        "script_name": "db_sync",
-        "script_args": "--book-id '{{book_id}}' --templates world",
+        "script_name": "local_archive",
+        "script_args": "prepare --require meta/world_foundation.md",
         "timeout": "30",
         "script_group": "nvl"
       },
@@ -58,7 +58,7 @@
     },
     {
       "id": "script_persist_skeleton",
-      "label": "写入DB：角色骨架",
+      "label": "本地存档：角色骨架",
       "node_type": "script",
       "agent_type": "default",
       "system_prompt_template": "",
@@ -72,8 +72,8 @@
         "script_source": "library",
         "script_type": "python",
         "script_group": "nvl",
-        "script_name": "json_to_db",
-        "script_args": "--book-id {{book_id}} --action upsert-character-skeleton --skeleton cache/character/skeleton.json --workflow-id {{_system.workflow_id}} --workflow-task-id {{_system.task_id}}",
+        "script_name": "local_archive",
+        "script_args": "checkpoint --files cache/character/skeleton.json",
         "timeout": "30"
       },
       "auto_flow": false,
@@ -140,7 +140,7 @@
     },
     {
       "id": "script_persist_belief",
-      "label": "写入DB：信念生态",
+      "label": "本地存档：信念生态",
       "node_type": "script",
       "agent_type": "default",
       "system_prompt_template": "",
@@ -154,8 +154,8 @@
         "script_source": "library",
         "script_type": "python",
         "script_group": "nvl",
-        "script_name": "json_to_db",
-        "script_args": "--book-id {{book_id}} --action upsert-character-beliefs --beliefs cache/character/beliefs.json --workflow-id {{_system.workflow_id}} --workflow-task-id {{_system.task_id}}",
+        "script_name": "local_archive",
+        "script_args": "checkpoint --files cache/character/beliefs.json",
         "timeout": "30"
       },
       "auto_flow": false,
@@ -193,7 +193,7 @@
     },
     {
       "id": "script_persist_deep",
-      "label": "写入DB：深层维度",
+      "label": "本地存档：深层维度",
       "node_type": "script",
       "agent_type": "default",
       "system_prompt_template": "",
@@ -207,38 +207,9 @@
         "script_source": "library",
         "script_type": "python",
         "script_group": "nvl",
-        "script_name": "json_to_db",
-        "script_args": "--book-id {{book_id}} --action upsert-character-deep --deep-file cache/character/{{name}}_deep.json --character-name {{name}} --workflow-id {{_system.workflow_id}} --workflow-task-id {{_system.task_id}}",
+        "script_name": "local_archive",
+        "script_args": "checkpoint --files cache/character/{{name}}_deep.json",
         "timeout": "30"
-      },
-      "auto_flow": false,
-      "enable_complete_node_task": true,
-      "output_variable": "",
-      "enable_reject_upstream": false,
-      "max_reject_count": 3,
-      "save_output_to_file": false,
-      "output_file_path": "",
-      "sub_workflow_params": {},
-      "fail_auto_skip": false
-    },
-    {
-      "id": "script_sleep",
-      "label": "等待SSE推送",
-      "node_type": "script",
-      "agent_type": "default",
-      "system_prompt_template": "",
-      "first_message": "",
-      "position": {
-        "x": 1050,
-        "y": 380
-      },
-      "var_bindings": {},
-      "node_params": {
-        "script_source": "inline",
-        "script_type": "python",
-        "script_name": "sleep_2s",
-        "script_args": "",
-        "timeout": "10"
       },
       "auto_flow": false,
       "enable_complete_node_task": true,
@@ -305,7 +276,7 @@
     },
     {
       "id": "script_persist_voice",
-      "label": "写入DB：角色声线",
+      "label": "本地存档：角色声线",
       "node_type": "script",
       "agent_type": "default",
       "system_prompt_template": "",
@@ -319,8 +290,8 @@
         "script_source": "library",
         "script_type": "python",
         "script_group": "nvl",
-        "script_name": "json_to_db",
-        "script_args": "--book-id {{book_id}} --action upsert-character-voice --voice cache/character/voice.json --workflow-id {{_system.workflow_id}} --workflow-task-id {{_system.task_id}}",
+        "script_name": "local_archive",
+        "script_args": "checkpoint --files cache/character/voice.json",
         "timeout": "30"
       },
       "auto_flow": false,
@@ -416,13 +387,8 @@
       "target": "script_persist_deep"
     },
     {
-      "id": "edge-persist-deep-sleep",
+      "id": "edge-persist-deep-loop",
       "source": "script_persist_deep",
-      "target": "script_sleep"
-    },
-    {
-      "id": "edge-sleep-loop",
-      "source": "script_sleep",
       "target": "gw_loop"
     },
     {
@@ -456,18 +422,6 @@
     }
   ],
   "variables": [
-    {
-      "key": "book_id",
-      "name": "书籍ID",
-      "type": "text",
-      "default": "",
-      "required": true,
-      "description": "书籍 UUID，建书 API 返回",
-      "options": [],
-      "source_type": "input",
-      "source_node_id": "",
-      "hidden": false
-    },
     {
       "key": "premise",
       "name": "题材创意",

@@ -1,11 +1,11 @@
 {
   "workflow_id": "polish",
   "name": "章节润色管线",
-  "version": 1,
+  "version": 2,
   "nodes": [
     {
       "id": "script_sync_down",
-      "label": "DB 同步下拉",
+      "label": "检查本地章节存档",
       "node_type": "script",
       "agent_type": "default",
       "system_prompt_template": "",
@@ -18,8 +18,8 @@
       "node_params": {
         "script_source": "library",
         "script_type": "python",
-        "script_name": "db_sync",
-        "script_args": "--book-id {{book_id}} --chapter {{chapter_number}} --templates polish_body",
+        "script_name": "local_archive",
+        "script_args": "prepare --require story/{{chapter_number}}/chapter.md",
         "timeout": 30,
         "script_group": "nvl"
       },
@@ -164,7 +164,7 @@
     },
     {
       "id": "script_sync_polish",
-      "label": "落库·润色",
+      "label": "本地存档·润色",
       "node_type": "script",
       "agent_type": "default",
       "system_prompt_template": "",
@@ -177,8 +177,8 @@
       "node_params": {
         "script_source": "library",
         "script_type": "python",
-        "script_name": "db_sync",
-        "script_args": "--book-id {{book_id}} --chapter {{chapter_number}} --direction polish --workflow-id {{_system.workflow_id}} --workflow-task-id {{_system.task_id}}",
+        "script_name": "local_archive",
+        "script_args": "checkpoint --files story/{{chapter_number}}/chapter.md,cache/sc/critique.json",
         "timeout": 30,
         "script_group": "nvl"
       },
@@ -236,18 +236,6 @@
     }
   ],
   "variables": [
-    {
-      "key": "book_id",
-      "name": "书 ID",
-      "type": "text",
-      "default": "b6f94cfa-15d7-4524-aa0b-2ab2c0cbf646",
-      "required": true,
-      "description": "书的 UUID",
-      "options": [],
-      "source_type": "input",
-      "source_node_id": "",
-      "hidden": false
-    },
     {
       "key": "chapter_number",
       "name": "章节号",

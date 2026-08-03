@@ -1,7 +1,8 @@
 # Bishu Novel
 
-`bishu-novel` 是随 DeterminFlow 开源的官方小说生产案例。它把一套真实运行的长链路写作
-流程拆成独立 Agent Node、确定性脚本和数据库检查点，并通过 API 对外提供服务。
+`bishu-novel` 是随 DeterminFlow 开源的纯本地小说生产案例。它把长链路写作流程拆成
+独立 Agent Node、确定性脚本和文件检查点，所有小说资料都保存在用户选择的本地
+Workflow Workspace（工作流工作区）中。
 
 ## 发布内容 ✍️
 
@@ -17,36 +18,27 @@
 
 包内还包括：
 
-- `/api/novel` 与 `/api/v1/novel` 接口、SSE 进度事件和幂等 Job；
-- PostgreSQL Schema、前向迁移和版本校验；
 - 33 个生产 Agent/Prompt，以及 Workflow 需要的 Script Library；
-- Engine HMAC 验证、Secret File 和数据库配置支持。
-
-Python 包路径暂时保留 `ai_company_plugin_bishu_novel`，这是首版兼容标识，不影响以
-DeterminFlow Plugin 的方式安装和运行。
+- `world/`、`meta/`、`outline/`、`story/`、`archive/` 与 `cache/` 组成的本地存档；
+- 工作区内的文件完整性检查、JSON 索引和 Markdown 渲染。
 
 ## 运行要求
 
 - DeterminFlow Core `v0.1.0` 或兼容版本
-- Python 3.11+
-- PostgreSQL 14+
 - Workflow 中引用的模型需要在 Core 中完成配置
 - `polish` 使用 AI Detect 节点时，需要配置可访问的 `AI_DETECT_GATEWAY_URL`
 
-复制 `.env.example` 中需要的配置。密码与 HMAC Key 必须通过环境变量、Plugin Settings
-或 `*_FILE` 提供，不要写进仓库。
+安装后不需要数据库、迁移、API、HMAC Key 或 UUID。运行每条 Workflow 时，为同一本书
+填写相同的 `workspace_override`，例如 `data/books/my-novel`。书籍目录名由用户自行决定，
+无需注册或生成 ID。
 
-```bash
-python -m pip install -r requirements.txt
-```
-
-正常安装时，依赖和数据库迁移由 DeterminFlow 根据 `extension.toml` 在冷启动阶段处理。
+建议依次运行：`build` → `character` → `story-plan` → `outline` → `mvp` →
+`post-hoc` / `polish`。每条流程会直接复用同一工作区中的已有文件。
 
 ## 文档
 
 - [Workflow 与资源](docs/workflows.md)
-- [API 入口](docs/api.md)
-- [部署与迁移](docs/deploy.md)
+- [本地存档结构](docs/local-archive.md)
 
 ## License
 

@@ -1,11 +1,11 @@
 {
   "workflow_id": "outline",
   "name": "卷纲+近纲规划管线",
-  "version": 1,
+  "version": 2,
   "nodes": [
     {
       "id": "script_sync_down",
-      "label": "DB 同步下拉",
+      "label": "检查本地前置存档",
       "node_type": "script",
       "agent_type": "default",
       "system_prompt_template": "",
@@ -18,8 +18,8 @@
       "node_params": {
         "script_source": "library",
         "script_type": "python",
-        "script_name": "db_sync",
-        "script_args": "--book-id {{book_id}} --templates world,character,story_plan,volume,near_term",
+        "script_name": "local_archive",
+        "script_args": "prepare --require meta/world_foundation.md,meta/character_profiles.md,meta/story_plan.md",
         "timeout": "30",
         "script_group": "nvl"
       },
@@ -88,7 +88,7 @@
     },
     {
       "id": "script_sync_up_vo",
-      "label": "落库 VO",
+      "label": "卷纲本地存档",
       "node_type": "script",
       "agent_type": "default",
       "system_prompt_template": "",
@@ -101,8 +101,8 @@
       "node_params": {
         "script_source": "library",
         "script_type": "python",
-        "script_name": "db_sync",
-        "script_args": "--book-id {{book_id}} --direction up --partial vo --workflow-id {{_system.workflow_id}} --workflow-task-id {{_system.task_id}}",
+        "script_name": "local_archive",
+        "script_args": "checkpoint --files cache/vo/volume.json,outline/volume_outline.md",
         "timeout": "30",
         "script_group": "nvl"
       },
@@ -171,7 +171,7 @@
     },
     {
       "id": "script_sync_up_no",
-      "label": "落库 NO",
+      "label": "近纲本地存档",
       "node_type": "script",
       "agent_type": "default",
       "system_prompt_template": "",
@@ -184,8 +184,8 @@
       "node_params": {
         "script_source": "library",
         "script_type": "python",
-        "script_name": "db_sync",
-        "script_args": "--book-id {{book_id}} --direction up --partial no --workflow-id {{_system.workflow_id}} --workflow-task-id {{_system.task_id}}",
+        "script_name": "local_archive",
+        "script_args": "checkpoint --files cache/no/near_term.json,outline/near_term_outline.md",
         "timeout": "30",
         "script_group": "nvl"
       },
@@ -338,18 +338,6 @@
       "source_type": "input",
       "source_node_id": "",
       "hidden": true
-    },
-    {
-      "key": "book_id",
-      "name": "书 UUID",
-      "type": "text",
-      "default": "",
-      "required": true,
-      "description": "",
-      "options": [],
-      "source_type": "input",
-      "source_node_id": "",
-      "hidden": false
     },
     {
       "key": "world_foundation_file",

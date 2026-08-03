@@ -14,7 +14,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/checkout@v4
         with:
-          repository: ${{ github.repository_owner }}/determinflow
+          repository: ${{ github.repository_owner }}/DeterminFlow
           path: determinflow
       - uses: actions/setup-python@v5
         with:
@@ -22,9 +22,7 @@ jobs:
           cache: pip
           cache-dependency-path: |
             determinflow/requirements-dev.lock
-            plugins/bishu-novel/requirements.txt
       - run: python -m pip install -r determinflow/requirements-dev.lock
-      - run: python -m pip install -r plugins/bishu-novel/requirements.txt
       - name: Test Plugin
         env:
           PYTHONPATH: ${{ github.workspace }}/determinflow:${{ github.workspace }}/plugins/bishu-novel
@@ -33,7 +31,3 @@ jobs:
         run: >-
           python determinflow/src/core/defaults/skills/workflow-guide/scripts/validate_definition.py
           plugins/bishu-novel/resources/workflows
-      - name: Build Python package
-        run: |
-          python -m pip install build
-          python -m build plugins/bishu-novel

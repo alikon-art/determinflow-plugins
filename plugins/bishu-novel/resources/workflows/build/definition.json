@@ -1,7 +1,7 @@
 {
   "workflow_id": "build",
   "name": "世界观构建管线",
-  "version": 1,
+  "version": 2,
   "nodes": [
     {
       "id": "agent_corelaws",
@@ -172,7 +172,7 @@
     },
     {
       "id": "script_persist_corelaws",
-      "label": "写入数据库：核心法则",
+      "label": "本地存档：核心法则",
       "node_type": "script",
       "agent_type": "default",
       "system_prompt_template": "",
@@ -186,8 +186,8 @@
         "script_source": "library",
         "script_type": "python",
         "script_group": "nvl",
-        "script_name": "json_to_db",
-        "script_args": "--book-id {{book_id}} --action upsert-world-dimension --dimension core_laws world/core_laws.json --workflow-id {{_system.workflow_id}} --workflow-task-id {{_system.task_id}}",
+        "script_name": "local_archive",
+        "script_args": "checkpoint --files world/core_laws.json",
         "timeout": "30"
       },
       "auto_flow": false,
@@ -202,7 +202,7 @@
     },
     {
       "id": "script_persist_spacetime",
-      "label": "写入数据库：时空地理",
+      "label": "本地存档：时空地理",
       "node_type": "script",
       "agent_type": "default",
       "system_prompt_template": "",
@@ -216,8 +216,8 @@
         "script_source": "library",
         "script_type": "python",
         "script_group": "nvl",
-        "script_name": "json_to_db",
-        "script_args": "--book-id {{book_id}} --action upsert-world-dimension --dimension space_time world/space_time.json --workflow-id {{_system.workflow_id}} --workflow-task-id {{_system.task_id}}",
+        "script_name": "local_archive",
+        "script_args": "checkpoint --files world/space_time.json",
         "timeout": "30"
       },
       "auto_flow": false,
@@ -232,7 +232,7 @@
     },
     {
       "id": "script_persist_society",
-      "label": "写入数据库：社会权力结构",
+      "label": "本地存档：社会权力结构",
       "node_type": "script",
       "agent_type": "default",
       "system_prompt_template": "",
@@ -246,8 +246,8 @@
         "script_source": "library",
         "script_type": "python",
         "script_group": "nvl",
-        "script_name": "json_to_db",
-        "script_args": "--book-id {{book_id}} --action upsert-world-dimension --dimension society world/society.json --workflow-id {{_system.workflow_id}} --workflow-task-id {{_system.task_id}}",
+        "script_name": "local_archive",
+        "script_args": "checkpoint --files world/society.json",
         "timeout": "30"
       },
       "auto_flow": false,
@@ -262,7 +262,7 @@
     },
     {
       "id": "script_persist_historyculture",
-      "label": "写入数据库：历史文化",
+      "label": "本地存档：历史文化",
       "node_type": "script",
       "agent_type": "default",
       "system_prompt_template": "",
@@ -276,8 +276,8 @@
         "script_source": "library",
         "script_type": "python",
         "script_group": "nvl",
-        "script_name": "json_to_db",
-        "script_args": "--book-id {{book_id}} --action upsert-world-dimension --dimension history_culture world/history_culture.json --workflow-id {{_system.workflow_id}} --workflow-task-id {{_system.task_id}}",
+        "script_name": "local_archive",
+        "script_args": "checkpoint --files world/history_culture.json",
         "timeout": "30"
       },
       "auto_flow": false,
@@ -292,7 +292,7 @@
     },
     {
       "id": "script_persist_existence",
-      "label": "写入数据库：存在基础",
+      "label": "本地存档：存在基础",
       "node_type": "script",
       "agent_type": "default",
       "system_prompt_template": "",
@@ -306,8 +306,8 @@
         "script_source": "library",
         "script_type": "python",
         "script_group": "nvl",
-        "script_name": "json_to_db",
-        "script_args": "--book-id {{book_id}} --action upsert-world-dimension --dimension existence world/existence.json --workflow-id {{_system.workflow_id}} --workflow-task-id {{_system.task_id}}",
+        "script_name": "local_archive",
+        "script_args": "checkpoint --files world/existence.json",
         "timeout": "30"
       },
       "auto_flow": false,
@@ -322,7 +322,7 @@
     },
     {
       "id": "script_persist_information",
-      "label": "写入数据库：信息传播结构",
+      "label": "本地存档：信息传播结构",
       "node_type": "script",
       "agent_type": "default",
       "system_prompt_template": "",
@@ -336,8 +336,8 @@
         "script_source": "library",
         "script_type": "python",
         "script_group": "nvl",
-        "script_name": "json_to_db",
-        "script_args": "--book-id {{book_id}} --action upsert-world-dimension --dimension information world/information.json --workflow-id {{_system.workflow_id}} --workflow-task-id {{_system.task_id}}",
+        "script_name": "local_archive",
+        "script_args": "checkpoint --files world/information.json",
         "timeout": "30"
       },
       "auto_flow": false,
@@ -515,18 +515,6 @@
       "default": "中文",
       "required": true,
       "description": "所有 agent 的产出语言。中文 / English",
-      "options": [],
-      "source_type": "input",
-      "source_node_id": "",
-      "hidden": false
-    },
-    {
-      "key": "book_id",
-      "name": "书 ID",
-      "type": "text",
-      "default": "",
-      "required": true,
-      "description": "UUID，book 表中已创建的书",
       "options": [],
       "source_type": "input",
       "source_node_id": "",

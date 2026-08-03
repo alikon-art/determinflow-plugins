@@ -1,11 +1,11 @@
 {
   "workflow_id": "post-hoc",
   "name": "章节后验管线",
-  "version": 1,
+  "version": 2,
   "nodes": [
     {
       "id": "script_sync_down",
-      "label": "DB 同步下拉",
+      "label": "检查本地章节存档",
       "node_type": "script",
       "agent_type": "default",
       "system_prompt_template": "",
@@ -18,8 +18,8 @@
       "node_params": {
         "script_source": "library",
         "script_type": "python",
-        "script_name": "db_sync",
-        "script_args": "--book-id {{book_id}} --chapter {{chapter_number}} --templates polish_body",
+        "script_name": "local_archive",
+        "script_args": "prepare --require story/{{chapter_number}}/chapter.md",
         "timeout": 30,
         "script_group": "nvl"
       },
@@ -78,7 +78,7 @@
     },
     {
       "id": "script_sync_up",
-      "label": "落库·后验",
+      "label": "本地存档·后验",
       "node_type": "script",
       "agent_type": "default",
       "system_prompt_template": "",
@@ -91,8 +91,8 @@
       "node_params": {
         "script_source": "library",
         "script_type": "python",
-        "script_name": "db_sync",
-        "script_args": "--book-id {{book_id}} --chapter {{chapter_number}} --direction up --partial ph --workflow-id {{_system.workflow_id}} --workflow-task-id {{_system.task_id}}",
+        "script_name": "local_archive",
+        "script_args": "post-hoc --chapter {{chapter_number}}",
         "timeout": 30,
         "script_group": "nvl"
       },
@@ -120,8 +120,8 @@
       "node_params": {
         "script_source": "library",
         "script_type": "python",
-        "script_name": "db_sync",
-        "script_args": "--book-id {{book_id}} --chapter {{chapter_number}} --templates hooks,debts,cur_diff_world,cur_diff_story,cur_diff_char",
+        "script_name": "local_archive",
+        "script_args": "render --inputs archive/hooks.json,archive/debts.json,story/{{chapter_number}}/diff_world_resolved.json,story/{{chapter_number}}/diff_story_confirmed.json,story/{{chapter_number}}/diff_character.json --outputs meta/hooks.md,meta/debts.md,story/{{chapter_number}}/diff_world_resolved.md,story/{{chapter_number}}/diff_story_confirmed.md,story/{{chapter_number}}/diff_character.md",
         "timeout": 30,
         "script_group": "nvl"
       },
@@ -168,18 +168,6 @@
     }
   ],
   "variables": [
-    {
-      "key": "book_id",
-      "name": "书 ID",
-      "type": "text",
-      "default": "b6f94cfa-15d7-4524-aa0b-2ab2c0cbf646",
-      "required": true,
-      "description": "",
-      "options": [],
-      "source_type": "input",
-      "source_node_id": "",
-      "hidden": false
-    },
     {
       "key": "chapter_number",
       "name": "章节号",

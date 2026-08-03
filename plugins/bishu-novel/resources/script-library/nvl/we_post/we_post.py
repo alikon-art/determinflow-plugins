@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""WE 后处理：we_output.json → world_state.json + world_events.json（纯拆分，MD 由 db_sync --render 渲染）"""
+"""WE 后处理：we_output.json → world_state.json + world_events.json。"""
 
 import argparse, json, os, sys
 
