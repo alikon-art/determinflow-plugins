@@ -1,7 +1,7 @@
 [extension]
 id = "bishu-novel"
 name = "Bishu Novel"
-version = "0.3.0"
+version = "0.2.1"
 api_version = "1"
 description = "File-only novel production workflows for DeterminFlow."
 dependencies = []

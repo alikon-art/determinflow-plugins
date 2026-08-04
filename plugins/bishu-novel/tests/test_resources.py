@@ -41,7 +41,7 @@ def test_manifest_is_resource_only() -> None:
         (PLUGIN_ROOT / "extension.toml").read_text(encoding="utf-8")
     )
     assert manifest["extension"]["id"] == "bishu-novel"
-    assert manifest["extension"]["version"] == "0.3.0"
+    assert manifest["extension"]["version"] == "0.2.1"
     assert "backend" not in manifest["extension"]
     assert "installation" not in manifest
     assert "lifecycle" not in manifest
