@@ -41,7 +41,7 @@ def test_manifest_is_resource_only() -> None:
         (PLUGIN_ROOT / "extension.toml").read_text(encoding="utf-8")
     )
     assert manifest["extension"]["id"] == "bishu-novel"
-    assert manifest["extension"]["version"] == "0.2.1"
+    assert manifest["extension"]["version"] == "0.2.2"
     assert "backend" not in manifest["extension"]
     assert "installation" not in manifest
     assert "lifecycle" not in manifest
@@ -50,11 +50,33 @@ def test_manifest_is_resource_only() -> None:
     assert set(manifest["resources"]) == {
         "agents",
         "prompts",
+        "skills",
         "skill_bundles",
         "workflows",
         "script_libraries",
     }
     assert "resources.skills" in manifest["extension"]["capabilities"]
+
+
+def test_writing_assistant_is_auto_injected_for_main() -> None:
+    resources = PLUGIN_ROOT / "resources"
+    skills = _json(resources / "skills.json")
+
+    assert skills["skills"] == {
+        "writing-assistant": {
+            "group_ids": ["default"],
+            "auto_inject": True,
+        }
+    }
+    assert skills["skill_configs"] == {
+        "writing-assistant": {
+            "enabled": True,
+            "priority": 70,
+            "auto_inject": True,
+            "workflow_only": False,
+        }
+    }
+    assert skills["groups"] == []
 
 
 def test_writing_assistant_skill_covers_public_workflow_contract() -> None:
@@ -172,7 +194,7 @@ def test_public_package_has_no_private_pipeline_markers() -> None:
 
     resources = PLUGIN_ROOT / "resources"
     assert not (PLUGIN_ROOT / "integration").exists()
-    assert not (resources / "skills.json").exists()
+    assert (resources / "skills.json").is_file()
     assert not (resources / "rules.json").exists()
     assert not (resources / "preset-phrases.json").exists()
     assert {

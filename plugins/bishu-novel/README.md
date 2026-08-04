@@ -37,11 +37,11 @@ Workflow Workspace（工作流工作区）中。
 可选 `polish` → `post-hoc`。每条流程会直接复用同一工作区中的已有文件；进入下一章前
 应完成当前章的 `post-hoc`，让后续章节读取已更新的连续性状态。
 
-通过 Chat Main 使用时，安装后的 `bishu-novel-writing-assistant` Skill 会维护书籍上下文、
-选择下一条 Workflow、解释创作参数并监督落盘结果。同一 Main 会话创建不同 Task 时应使用
-相同的 `named_shared` 工作区名称；需要跨 Main 会话继续时，当前 Chat 工具不能仅凭同名
-`workspace_ref` 重新连接旧目录，应继续原会话，或通过 Web/API 使用固定的
-`workspace_override`。
+通过 Chat Main 使用时，安装后的 `bishu-novel-writing-assistant` Skill 默认启用并自动
+注入 Main，会维护书籍上下文、选择下一条 Workflow、解释创作参数并监督落盘结果。用户仍可
+在 Skill 页面关闭自动注入。同一 Main 会话创建不同 Task 时应使用相同的 `named_shared`
+工作区名称；需要跨 Main 会话继续时，当前 Chat 工具不能仅凭同名 `workspace_ref` 重新连接
+旧目录，应继续原会话，或通过 Web/API 使用固定的 `workspace_override`。
 
 插件内的 Agent Definition（智能体定义）不固定模型，所有 Agent Node 默认继承 Core
 `agents_config.json` 中 `main.model` 指向的模型。切换 Core 默认模型即可统一切换整套

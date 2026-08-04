@@ -5,6 +5,7 @@ from pathlib import Path
 
 from src.extension_host.lifecycle import load_extension_lifecycle
 from src.extension_host.manifest import parse_extension_manifest
+from src.extension_host.plugin_preflight import validate_plugin_checkout
 
 
 PLUGIN_ROOT = Path(__file__).resolve().parents[1]
@@ -16,7 +17,7 @@ def test_resource_only_manifest_is_portable() -> None:
     )
     extension = manifest["extension"]
     assert extension["id"] == "bishu-novel"
-    assert extension["version"] == "0.2.1"
+    assert extension["version"] == "0.2.2"
     assert manifest["resource_namespace"]["prefix"] == "bishu-novel"
     assert "backend" not in extension
     assert extension["dependencies"] == []
@@ -32,9 +33,11 @@ def test_manifest_matches_core_resource_only_contract() -> None:
     lifecycle = load_extension_lifecycle(manifest_path)
 
     assert parsed.extension_id == "bishu-novel"
-    assert parsed.version == "0.2.1"
+    assert parsed.version == "0.2.2"
     assert parsed.backend == ""
     assert lifecycle is None
+
+    validate_plugin_checkout("bishu-novel", PLUGIN_ROOT)
 
 
 def test_old_monorepo_imports_and_platform_deployment_assets_are_absent() -> None:

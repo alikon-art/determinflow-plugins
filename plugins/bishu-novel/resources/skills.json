@@ -1,0 +1,20 @@
+{
+  "version": "1.0",
+  "skills": {
+    "writing-assistant": {
+      "group_ids": [
+        "default"
+      ],
+      "auto_inject": true
+    }
+  },
+  "skill_configs": {
+    "writing-assistant": {
+      "enabled": true,
+      "priority": 70,
+      "auto_inject": true,
+      "workflow_only": false
+    }
+  },
+  "groups": []
+}

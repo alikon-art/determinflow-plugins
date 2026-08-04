@@ -36,8 +36,9 @@ Agent Definition 不声明模型，Workflow 也不设置 `model_override`，因�
 
 插件随包提供 `writing-assistant` Skill，安装后有效 ID 通常为
 `bishu-novel-writing-assistant`；若安装时覆盖了资源 Prefix，应以 `get_skills` 返回的
-实际 ID 为准。它要求 Main 在操作前读取实际 Workflow 定义，并以写作助手和工作流主管的
-身份帮助用户选择流程、收集必要创作输入、监督 Task 和核验文件结果。
+实际 ID 为准。该 Skill 默认加入 Core `default` 组并开启自动注入；用户可以在 Skill
+页面覆盖这一默认值。它要求 Main 在操作前读取实际 Workflow 定义，并以写作助手和工作流
+主管的身份帮助用户选择流程、收集必要创作输入、监督 Task 和核验文件结果。
 
 Chat Main 的 `create_and_attach_task` 不直接接收 `workspace_override`。为了让七条 Workflow
 共享同一本书，同一 Main 会话内应使用 `workspace_mode=named_shared`，并为这本书的每个
