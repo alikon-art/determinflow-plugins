@@ -1,0 +1,41 @@
+{
+  "skill_name": "writing-assistant",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "我有一个都市异能故事：一个只能听见被删除记忆的夜班陪练，想从零开始建书，中文写作。你直接帮我推进。",
+      "expected_output": "助手先确定一个书籍共享工作区，选择实际 build Workflow，把创意整理为 premise 和 genre，并在明确执行授权下创建、填参、启动和监督任务。",
+      "files": [],
+      "expectations": [
+        "把用户视为作者，并以写作助手和工作流主管的身份解释下一步",
+        "先通过 list_workflows 和 get_workflow 读取实际 Workflow，而不是硬编码有效 ID",
+        "Chat Main 使用 named_shared 和稳定 workspace_ref，而不是 task_isolated",
+        "只有 completed 且关键世界观文件非空时才报告建书阶段完成"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "继续 night-shift 这本书。第 11 章和后验都已经完成，请写第 12 章：妹妹发现合约上的伤势条款被改过，结尾停在她认出修改笔迹。目标 3000-4000 字，单写手。",
+      "expected_output": "助手复用 night-shift 工作区，选择 mvp，使用 0012/0011、human_intent、目标字数和 single，监督正文落盘，并把可选润色和后验作为下一步。",
+      "files": [],
+      "expectations": [
+        "不重跑 build、character、story-plan 或 outline",
+        "chapter_number 使用 0012，prev_chapter 使用 0011",
+        "用户的情节要求进入 human_intent，不误放入 world_intent",
+        "正文完成后推荐可选 polish，并要求进入下一章前完成 post-hoc"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "echo-zone 已有世界观和角色，但我找不到故事规划文件。先别问太多，直接帮我做第一章。",
+      "expected_output": "助手识别 mvp 前置不足，先把同一 premise/genre 补入 story-plan，随后再做 outline；不会伪造文件、跳过准备节点或直接启动第一章。",
+      "files": [],
+      "expectations": [
+        "明确指出缺少 meta/story_plan.md 或对应非空产物",
+        "先选择 story-plan，而不是直接启动 mvp",
+        "沿用 echo-zone 的同一共享工作区",
+        "只追问会改变 story-plan 的最少创作缺口"
+      ]
+    }
+  ]
+}

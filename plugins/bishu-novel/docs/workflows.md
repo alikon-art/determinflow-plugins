@@ -13,6 +13,10 @@ Resource Resolver（资源解析器）映射为最终 ID；插件代码不拼接
 | `post-hoc` | 章节观察、裁决、状态回写 | 世界/角色差异、伏笔与债务 |
 | `polish` | 自审、AI 检测、两阶段润色 | 新的章节正文版本 |
 
+新书建议按 `build` → `character` → `story-plan` → `outline` 建立生产前置。单章循环建议按
+`mvp` → 可选 `polish` → `post-hoc` 执行，再进入下一章。若先做 `post-hoc`、后续润色又
+改变了情节事实，应重新运行该章 `post-hoc`，避免连续性状态与最终正文不一致。
+
 ## 资源边界
 
 - `resources/agents.json` 与 `resources/prompts.json` 只包含以上 Workflow 实际引用的资源。
@@ -27,3 +31,16 @@ Resource Resolver（资源解析器）映射为最终 ID；插件代码不拼接
 Agent Definition 不声明模型，Workflow 也不设置 `model_override`，因此所有 Agent Node
 继承 Core `agents_config.json` 中的 `main.model`。每个 Agent Node 仍使用独立会话、
 模型参数和工具权限，脚本节点负责确定性转换与本地落盘。
+
+## Chat Main 协作
+
+插件随包提供 `writing-assistant` Skill，安装后有效 ID 通常为
+`bishu-novel-writing-assistant`；若安装时覆盖了资源 Prefix，应以 `get_skills` 返回的
+实际 ID 为准。它要求 Main 在操作前读取实际 Workflow 定义，并以写作助手和工作流主管的
+身份帮助用户选择流程、收集必要创作输入、监督 Task 和核验文件结果。
+
+Chat Main 的 `create_and_attach_task` 不直接接收 `workspace_override`。为了让七条 Workflow
+共享同一本书，同一 Main 会话内应使用 `workspace_mode=named_shared`，并为这本书的每个
+Task 复用相同 `workspace_ref`。`named_shared` 以 Main 会话隔离，新会话不能只凭同名
+`workspace_ref` 连接旧目录；跨会话使用应继续原会话，或由 Web/API 复用同一个
+`workspace_override`。

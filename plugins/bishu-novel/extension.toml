@@ -1,7 +1,7 @@
 [extension]
 id = "bishu-novel"
 name = "Bishu Novel"
-version = "0.2.1"
+version = "0.3.0"
 api_version = "1"
 description = "File-only novel production workflows for DeterminFlow."
 dependencies = []
@@ -9,6 +9,7 @@ capabilities = [
   "workflow.runtime",
   "resources.agents",
   "resources.prompts",
+  "resources.skills",
   "resources.workflows",
   "resources.scripts",
 ]
@@ -19,5 +20,6 @@ prefix = "bishu-novel"
 [resources]
 agents = "resources/agents.json"
 prompts = "resources/prompts.json"
+skill_bundles = "resources/skill-bundles"
 workflows = "resources/workflows"
 script_libraries = "resources/script-library"

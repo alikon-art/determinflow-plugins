@@ -19,6 +19,7 @@ Workflow Workspace（工作流工作区）中。
 包内还包括：
 
 - 33 个生产 Agent/Prompt，以及 Workflow 需要的 Script Library；
+- `writing-assistant` Skill，让 Main 同时作为用户的写作助手和写作工作流主管；
 - `world/`、`meta/`、`outline/`、`story/`、`archive/` 与 `cache/` 组成的本地存档；
 - 工作区内的文件完整性检查、JSON 索引和 Markdown 渲染。
 
@@ -33,7 +34,14 @@ Workflow Workspace（工作流工作区）中。
 无需注册或生成 ID。
 
 建议依次运行：`build` → `character` → `story-plan` → `outline` → `mvp` →
-`post-hoc` / `polish`。每条流程会直接复用同一工作区中的已有文件。
+可选 `polish` → `post-hoc`。每条流程会直接复用同一工作区中的已有文件；进入下一章前
+应完成当前章的 `post-hoc`，让后续章节读取已更新的连续性状态。
+
+通过 Chat Main 使用时，安装后的 `bishu-novel-writing-assistant` Skill 会维护书籍上下文、
+选择下一条 Workflow、解释创作参数并监督落盘结果。同一 Main 会话创建不同 Task 时应使用
+相同的 `named_shared` 工作区名称；需要跨 Main 会话继续时，当前 Chat 工具不能仅凭同名
+`workspace_ref` 重新连接旧目录，应继续原会话，或通过 Web/API 使用固定的
+`workspace_override`。
 
 插件内的 Agent Definition（智能体定义）不固定模型，所有 Agent Node 默认继承 Core
 `agents_config.json` 中 `main.model` 指向的模型。切换 Core 默认模型即可统一切换整套
@@ -43,6 +51,7 @@ Workflow Workspace（工作流工作区）中。
 
 - [Workflow 与资源](docs/workflows.md)
 - [本地存档结构](docs/local-archive.md)
+- [写作助手 Skill](resources/skill-bundles/writing-assistant/SKILL.md)
 
 ## License
 

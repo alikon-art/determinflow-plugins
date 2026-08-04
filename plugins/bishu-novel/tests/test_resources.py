@@ -29,6 +29,7 @@ EXPECTED_SCRIPT_LIBRARIES = {
     "vo_post",
     "we_post",
 }
+EXPECTED_SKILLS = {"writing-assistant"}
 
 
 def _json(path: Path) -> dict:
@@ -40,7 +41,7 @@ def test_manifest_is_resource_only() -> None:
         (PLUGIN_ROOT / "extension.toml").read_text(encoding="utf-8")
     )
     assert manifest["extension"]["id"] == "bishu-novel"
-    assert manifest["extension"]["version"] == "0.2.1"
+    assert manifest["extension"]["version"] == "0.3.0"
     assert "backend" not in manifest["extension"]
     assert "installation" not in manifest
     assert "lifecycle" not in manifest
@@ -49,9 +50,43 @@ def test_manifest_is_resource_only() -> None:
     assert set(manifest["resources"]) == {
         "agents",
         "prompts",
+        "skill_bundles",
         "workflows",
         "script_libraries",
     }
+    assert "resources.skills" in manifest["extension"]["capabilities"]
+
+
+def test_writing_assistant_skill_covers_public_workflow_contract() -> None:
+    skill_root = (
+        PLUGIN_ROOT
+        / "resources"
+        / "skill-bundles"
+        / "writing-assistant"
+    )
+    skill = (skill_root / "SKILL.md").read_text(encoding="utf-8")
+    workflow_reference = (
+        skill_root / "references" / "workflows.md"
+    ).read_text(encoding="utf-8")
+    workspace_reference = (
+        skill_root / "references" / "workspace.md"
+    ).read_text(encoding="utf-8")
+
+    assert "name: writing-assistant" in skill
+    assert "写作助手" in skill
+    assert "写作工作流主管" in skill
+    assert "workspace_mode=named_shared" in skill
+    assert "list_workflows" in skill
+    assert "get_workflow" in skill
+    assert "get_task_result" in skill
+    assert EXPECTED_WORKFLOWS <= set(workflow_reference.split("`"))
+    assert "task_isolated" in workspace_reference
+    assert "workspace_override" in workspace_reference
+
+    evals = _json(PLUGIN_ROOT / "evals" / "evals.json")
+    assert evals["skill_name"] == "writing-assistant"
+    assert len(evals["evals"]) == 3
+    assert all(case["expectations"] for case in evals["evals"])
 
 
 def test_resource_graph_contains_only_referenced_production_resources() -> None:
@@ -140,3 +175,8 @@ def test_public_package_has_no_private_pipeline_markers() -> None:
     assert not (resources / "skills.json").exists()
     assert not (resources / "rules.json").exists()
     assert not (resources / "preset-phrases.json").exists()
+    assert {
+        path.name
+        for path in (resources / "skill-bundles").iterdir()
+        if path.is_dir()
+    } == EXPECTED_SKILLS
