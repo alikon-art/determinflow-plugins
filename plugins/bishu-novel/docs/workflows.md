@@ -24,5 +24,6 @@ Resource Resolver（资源解析器）映射为最终 ID；插件代码不拼接
 为同一本书运行不同 Workflow 时，必须填写相同的 `workspace_override`。本地存档脚本会
 检查前置文件、构建章节上下文并保存结构化索引，不连接数据库，也不需要书籍 ID。
 
-模型 ID 由 Agent 模板声明，实际 Provider 和凭据由 Core 管理。每个 Agent Node 都使用
-自己的会话、模型配置和工具权限，脚本节点负责确定性转换与本地落盘。
+Agent Definition 不声明模型，Workflow 也不设置 `model_override`，因此所有 Agent Node
+继承 Core `agents_config.json` 中的 `main.model`。每个 Agent Node 仍使用独立会话、
+模型参数和工具权限，脚本节点负责确定性转换与本地落盘。

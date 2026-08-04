@@ -25,7 +25,7 @@ Workflow Workspace（工作流工作区）中。
 ## 运行要求
 
 - DeterminFlow Core `v0.1.0` 或兼容版本
-- Workflow 中引用的模型需要在 Core 中完成配置
+- Core `main` Agent 使用的默认模型和凭据需要完成配置
 - `polish` 使用 AI Detect 节点时，需要配置可访问的 `AI_DETECT_GATEWAY_URL`
 
 安装后不需要数据库、迁移、API、HMAC Key 或 UUID。运行每条 Workflow 时，为同一本书
@@ -34,6 +34,10 @@ Workflow Workspace（工作流工作区）中。
 
 建议依次运行：`build` → `character` → `story-plan` → `outline` → `mvp` →
 `post-hoc` / `polish`。每条流程会直接复用同一工作区中的已有文件。
+
+插件内的 Agent Definition（智能体定义）不固定模型，所有 Agent Node 默认继承 Core
+`agents_config.json` 中 `main.model` 指向的模型。切换 Core 默认模型即可统一切换整套
+工作流使用的模型，无需修改插件资源。
 
 ## 文档
 

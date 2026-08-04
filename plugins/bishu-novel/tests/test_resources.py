@@ -40,7 +40,7 @@ def test_manifest_is_resource_only() -> None:
         (PLUGIN_ROOT / "extension.toml").read_text(encoding="utf-8")
     )
     assert manifest["extension"]["id"] == "bishu-novel"
-    assert manifest["extension"]["version"] == "0.2.0"
+    assert manifest["extension"]["version"] == "0.2.1"
     assert "backend" not in manifest["extension"]
     assert "installation" not in manifest
     assert "lifecycle" not in manifest
@@ -102,6 +102,18 @@ def test_workflows_do_not_require_database_or_book_ids() -> None:
         assert "uuid" not in content
         assert "db_sync" not in content
         assert "json_to_db" not in content
+
+
+def test_agents_inherit_core_main_model() -> None:
+    resources = PLUGIN_ROOT / "resources"
+    agents = _json(resources / "agents.json")["agents"]
+
+    assert all("model" not in definition for definition in agents.values())
+    for definition_path in (resources / "workflows").glob("*/definition.json"):
+        definition = _json(definition_path)
+        for node in definition.get("nodes", []):
+            if node.get("node_type") == "agent":
+                assert not node.get("model_override")
 
 
 def test_public_package_has_no_private_pipeline_markers() -> None:
